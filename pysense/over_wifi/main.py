@@ -1,15 +1,22 @@
 from network import WLAN
 from pysense import Pysense
 from base import CreateSensors
+import pycom
 import machine
 import urequests
 import time
 import ujson
 
+RED = 0x7f0000
+GREEN = 0x007f00
+YELLOW = 0x7f7f00
+
+pycom.heartbeat(False)
+
 wlan = WLAN(mode=WLAN.STA)
 
-# wlan.connect(ssid='LCD-IoT', auth=(WLAN.WPA2, '1cdunc0rd0ba'))
-wlan.connect(ssid='LCD3', auth=(WLAN.WPA2, '1cdunc0rd0ba'))
+wlan.connect(ssid='LCD-IoT', auth=(WLAN.WPA2, '1cdunc0rd0ba'))
+# wlan.connect(ssid='LCD3', auth=(WLAN.WPA2, '1cdunc0rd0ba'))
 
 while not wlan.isconnected():
     machine.idle()
@@ -37,6 +44,9 @@ def get_data():
     return json_data_sensors
 
 for i in range(4):
+    pycom.rgbled(RED)
     response = urequests.post("http://192.168.1.162:5000/api/v1/users/", data=get_data())
+    pycom.rgbled(GREEN)
     print(response)
     time.sleep(2)
+    pycom.rgbled(YELLOW)
