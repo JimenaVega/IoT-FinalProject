@@ -1,0 +1,5 @@
+New Node 6 DevEUI: 70b3d5499ebbdf1a
+
+MicroPython Request Libraries:
+    - urequests
+    - socket
