@@ -5,11 +5,13 @@ import pycom
 import machine
 import urequests
 import time
+import utime
 import ujson
 
 RED = 0x7f0000
 GREEN = 0x007f00
 YELLOW = 0x7f7f00
+NO_COLOUR = 0x000000
 
 pycom.heartbeat(False)
 
@@ -23,7 +25,7 @@ while not wlan.isconnected():
 print("WiFi connected succesfully")
 print(wlan.ifconfig())
 
-def get_data():
+def get_data(json=False):
     # Pysense Object and sensors
     py = Pysense()
     pySensors = CreateSensors(py)
@@ -41,12 +43,44 @@ def get_data():
 
     json_data_sensors = ujson.dumps(data_sensors)
 
-    return json_data_sensors
+    if json==True:
+        return json_data_sensors
+    else:
+        return data_sensors
 
-for i in range(4):
+def store_data(samples, interval):
+    stored_data = {}
+    for i in range(samples):
+        time.sleep(interval)
+        stored_data["{0}".format(i)] = get_data()
+
+    json_stored_data = ujson.dumps(stored_data)
+
+    print(type(stored_data))
+    print(type(json_stored_data))
+
+    return json_stored_data
+
+def blinking_sleep(secs, colour):
+    for i in range(secs):
+        pycom.rgbled(colour)
+        time.sleep(0.3)
+        pycom.rgbled(NO_COLOUR)
+        time.sleep(0.7)
+
+def post_method(address, raw_data):
+    response = urequests.post(address, data=raw_data)
+
+    return response
+
+sent = 0
+
+while True:
     pycom.rgbled(RED)
-    response = urequests.post("http://192.168.1.162:5000/api/v1/users/", data=get_data())
-    pycom.rgbled(GREEN)
-    print(response)
-    time.sleep(2)
-    pycom.rgbled(YELLOW)
+    stored_data = store_data(10, 2)
+    print(stored_data)
+    response = post_method("http://192.168.1.162:5000/api/v1/users/", stored_data)
+    sent += 1
+    blinking_sleep(3, GREEN)
+    print("{0}:{1}".format(sent,response))
+    blinking_sleep(3, YELLOW)
