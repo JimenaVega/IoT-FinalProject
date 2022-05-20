@@ -5,7 +5,7 @@ Copyright (c) 2019, Pycom Limited.
 This example continuously sends a REQA for ISO14443A card type
 If a card is discovered, it will read the UID
 If DECODE_CARD = True, will attempt to authenticate with CARDkey
-If authenticatiopyn succeeds will attempt to read sectors from the card
+If authentication succeeds will attempt to read sectors from the card
 '''
 # PYSCAN
 from pycoproc_1 import Pycoproc
@@ -64,10 +64,8 @@ while not wlan.isconnected():
 print("WiFi connected succesfully")
 print(wlan.ifconfig())
 
-#sgsdg
 def get_data():
     data_sensors = {
-        'name': 'pyscan',
         'acceleration': li.acceleration(),
         'light': lt.light()
     }

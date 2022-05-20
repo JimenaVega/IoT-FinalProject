@@ -28,13 +28,14 @@ def disp(num):
 
 @app.route('/api/v1/users/', methods=['POST'])
 def create_user():
-    json = request.get_json(force=True)
-    print(json)
-
-    # if json.get('username') is None:
-    #     return jsonify({'message': 'Bad request'}), 400
-
-    # user = User.create(json['username'])
+    print('ENTRO')
+    try:
+        json = request.get_json(force=True)
+        # json = request.args.get(1)
+        print(json)
+    except:
+        print('error handleado')
+  
 
     return jsonify({'user': 'holi'})
   
