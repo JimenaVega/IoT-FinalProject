@@ -28,21 +28,23 @@ print("WiFi connected succesfully")
 print(wlan.ifconfig())
 
 rates = {
-    'transmission_rate': 60,
-    'aceleration_rate': 30,
+    'transmission_rate': 3,
+    'acceleration_rate': 30,
     'light_rate': 30,
     'temperature_rate': 30,
     'humidity_rate': 30,
     'altitude_rate': 3,
-    'battery_voltage': 30,
-    'roll': 30,
-    'pitch': 30
+    'battery_voltage_rate': 30,
+    'roll_rate': 30,
+    'pitch_rate': 30
 }
 
-# def timer_handler(alarm):
-#     print("Interrupt called")
+def transmission_handler(alarm):
+    alarm.cancel()
+    alarm = Timer.Alarm(transmission_handler, rates['transmission_rate'], periodic=True)
+    print("Transmission alarm every {} seconds.".format(rates['transmission_rate']))
 
-# alarm = Timer.Alarm(timer_handler, 1, periodic=True)
+transmission_alarm = Timer.Alarm(transmission_handler, rates['transmission_rate'], periodic=True)
 
 def get_data(json=False):
     # Pysense Object and sensors
@@ -75,9 +77,6 @@ def store_data(samples, interval):
 
     json_stored_data = ujson.dumps(stored_data)
 
-    print(type(stored_data))
-    print(type(json_stored_data))
-
     return json_stored_data
 
 def blinking_sleep(secs, colour):
@@ -96,15 +95,19 @@ def get_rates(address):
     response = urequests.get(address)
     new_rates = response.json()
 
-    rates['transmission_rate']  = new_rates['transmission_rate']
-    rates['aceleration_rate']   = new_rates['aceleration_rate']
-    rates['light_rate']         = new_rates['light_rate']
-    rates['temperature_rate']   = new_rates['temperature_rate']
-    rates['humidity_rate']      = new_rates['humidity_rate']
-    rates['altitude_rate']      = new_rates['altitude_rate']
-    rates['battery_voltage']    = new_rates['battery_voltage']
-    rates['roll']               = new_rates['roll']
-    rates['pitch']              = new_rates['pitch']
+    print("Old rates:\n",rates)
+
+    rates['transmission_rate']      = new_rates['transmission_rate']
+    rates['acceleration_rate']      = new_rates['acceleration_rate']
+    rates['light_rate']             = new_rates['light_rate']
+    rates['temperature_rate']       = new_rates['temperature_rate']
+    rates['humidity_rate']          = new_rates['humidity_rate']
+    rates['altitude_rate']          = new_rates['altitude_rate']
+    rates['battery_voltage_rate']   = new_rates['battery_voltage_rate']
+    rates['roll_rate']              = new_rates['roll_rate']
+    rates['pitch_rate']             = new_rates['pitch_rate']
+    
+    print("New rates:\n",rates)
 
     return response
 
@@ -113,8 +116,8 @@ sent = 0
 while True:
     get_response = get_rates("http://192.168.1.162:5000/api/rates/")
     pycom.rgbled(RED)
-    stored_data = store_data(2, 2)
-    print(stored_data)
+    stored_data = store_data(2, 5)
+    print("Store data done")
     response = post_method("http://192.168.1.162:5000/api/v1/users/", stored_data)
     sent += 1
     blinking_sleep(3, GREEN)
