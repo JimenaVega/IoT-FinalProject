@@ -1,5 +1,6 @@
 # Using flask to make an api
 # import necessary libraries and functions
+import datetime
 from distutils.log import debug
 from flask import Flask, jsonify, request
   
@@ -38,7 +39,34 @@ def create_user():
   
 
     return jsonify({'user': 'holi'})
+
+@app.route('/api/settings/', methods=['GET']) 
+def get_timestamp():
+
+    presentDate = datetime.datetime.now()
+    unix_timestamp = datetime.datetime.timestamp(presentDate)*1000
+    print(unix_timestamp)
+    
+    return jsonify({"ts":unix_timestamp})
   
+@app.route('/api/rates/', methods=['GET'])
+def get_rates():
+    
+    rates = {
+            'transmission_rate':2,
+            'acceleration_rate':12,
+            'light_rate':11,
+            'temperature_rate':11,
+            'humidity_rate':5,
+            'altitude_rate':5,
+            'battery_voltage_rate':5,
+            'roll_rate':5,
+            'pitch_rate':5
+         }
+
+    return jsonify(rates)
+
+
 # driver function
 if __name__ == '__main__':
   

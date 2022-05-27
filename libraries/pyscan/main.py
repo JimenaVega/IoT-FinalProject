@@ -1,11 +1,6 @@
 '''
 Simple Pyscan NFC / MiFare Classic Example
 Copyright (c) 2019, Pycom Limited.
-
-This example continuously sends a REQA for ISO14443A card type
-If a card is discovered, it will read the UID
-If DECODE_CARD = True, will attempt to authenticate with CARDkey
-If authentication succeeds will attempt to read sectors from the card
 '''
 # PYSCAN
 from pycoproc_1 import Pycoproc
@@ -76,7 +71,10 @@ def get_data():
 
 print('Scanning for cards')
 while(1):
-    response = urequests.post("http://192.168.1.162:5000/api/v1/users/", data=get_data())
-    print(response)
+    # response = urequests.post("http://192.168.1.162:5000/api/v1/users/", data=get_data())
+    # print(response)
+    # get_response = urequests.get("http://192.168.1.162:5000/api/settings/")
+    get_response = urequests.get("http://192.168.1.162:5000/api/rates/")
+    print(get_response.json())
     time.sleep(1)
 
