@@ -76,7 +76,6 @@ def get_data():
     return json_data_sensors
 
 
-print('Scanning for cards')
 while(1):
     response = urequests.post("http://192.168.1.162:5000/api/v1/users/", data=get_data())
     print(response)

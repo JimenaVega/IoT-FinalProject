@@ -2,20 +2,28 @@
 # import necessary libraries and functions
 import datetime
 from distutils.log import debug
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
   
 # creating a Flask app
 app = Flask(__name__)
+
+rate_change = False
+
+rates = {
+        'transmission_rate':10,
+        'acceleration_rate':10,
+        'light_rate':10,
+        'temperature_rate':10,
+        'humidity_rate':10,
+        'altitude_rate':10,
+        'battery_voltage_rate':10,
+        'roll_rate':10,
+        'pitch_rate':10
+        }
   
-# on the terminal type: curl http://127.0.0.1:5000/
-# returns hello world when we use GET.
-# returns the data that we send when we use POST.
-@app.route('/', methods = ['GET', 'POST'])
-def home():
-    if(request.method == 'GET'):
-  
-        data = "hello world"
-        return jsonify({'data': data})
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 # A simple function to calculate the square of a number
 # the number to be squared is sent in the URL when we use GET
@@ -32,13 +40,14 @@ def create_user():
     print('ENTRO')
     try:
         json = request.get_json(force=True)
-        # json = request.args.get(1)
         print(json)
     except:
         print('error handleado')
-  
+    print('CREATE_USER')
+    print(rate_change)
+    print('--------------')
 
-    return jsonify({'user': 'holi'})
+    return jsonify({'changes': rate_change})
 
 @app.route('/api/settings/', methods=['GET']) 
 def get_timestamp():
@@ -48,22 +57,28 @@ def get_timestamp():
     print(unix_timestamp)
     
     return jsonify({"ts":unix_timestamp})
-  
+
+# Use with:
+# curl -X POST -H "Content-Type: application/json" -d '{"transmission_rate":1}' http://192.168.1.162:5000/api/set_rates/#
+@app.route('/api/set_rates/', methods=['POST'])
+def set_rates():
+    print('SET_RATES')
+    rate_change = True
+    print(rate_change)
+    print('----------')
+    try:
+        json = request.get_json(force=False)
+        print(json)
+    except:
+        print('error handleado')
+    
+    
+    
+    return jsonify({'changes': '1'})
+
 @app.route('/api/rates/', methods=['GET'])
 def get_rates():
-    
-    rates = {
-            'transmission_rate':2,
-            'acceleration_rate':12,
-            'light_rate':11,
-            'temperature_rate':11,
-            'humidity_rate':5,
-            'altitude_rate':5,
-            'battery_voltage_rate':5,
-            'roll_rate':5,
-            'pitch_rate':5
-         }
-
+    # rate_change = False
     return jsonify(rates)
 
 
