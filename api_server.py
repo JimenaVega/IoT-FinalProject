@@ -72,8 +72,6 @@ def set_rates():
     except:
         print('error handleado')
     
-    
-    
     return jsonify({'changes': '1'})
 
 @app.route('/api/rates/', methods=['GET'])
