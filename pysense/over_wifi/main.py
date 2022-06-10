@@ -8,7 +8,11 @@ import time
 import utime
 import ujson
 from machine import Timer
+from machine import RTC
 from urequests import Response
+
+SERVER_ADDRESS = "http://192.168.1.184"
+SERVER_PORT = "5000"
 
 RED = 0x7f0000
 GREEN = 0x007f00
@@ -28,8 +32,11 @@ while not wlan.isconnected():
 print("WiFi connected succesfully")
 print(wlan.ifconfig())
 
-unixtime = urequests.get("http://192.168.1.162:5000/api/settings/")
+unixtime = urequests.get(SERVER_ADDRESS + ":" + SERVER_PORT + "/api/settings/")
 print("Unix Time: ", unixtime.json())
+rtc = RTC()
+rtc.now()
+rtc.init(time.localtime(unixtime.json()['ts']))
 
 # Pysense Object and sensors
 py = Pysense()
@@ -183,9 +190,9 @@ def get_rates(address):
 sent = 0
 
 while True:
-    print("Board Unix Time: ", time.time())
+    print("Board Unix Time: ", rtc.now())
     try:
-        get_response = get_rates("http://192.168.1.162:5000/api/rates/")
+        get_response = get_rates(SERVER_ADDRESS + ":" + SERVER_PORT + "/api/rates/")
     except:
         print("GET attempt failed.")
 
@@ -195,7 +202,7 @@ while True:
     pycom.rgbled(RED)
 
     try:
-        response = post_method("http://192.168.1.162:5000/api/v1/users/", stored_data)
+        response = post_method(SERVER_ADDRESS + ":" + SERVER_PORT + "/api/v1/users/", stored_data)
         # print(response.json())
     except:
         response = ''
