@@ -36,7 +36,6 @@ if 'pybytes' in globals():
         pybytes_enabled = True
 
 
-
 pycom.heartbeat(False)
 
 wlan = WLAN(mode=WLAN.STA)

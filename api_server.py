@@ -1,6 +1,6 @@
 # Using flask to make an api
 # import necessary libraries and functions
-import datetime
+import time
 from distutils.log import debug
 from flask import Flask, jsonify, request, render_template
   
@@ -52,8 +52,7 @@ def create_user():
 @app.route('/api/settings/', methods=['GET']) 
 def get_timestamp():
 
-    presentDate = datetime.datetime.now()
-    unix_timestamp = datetime.datetime.timestamp(presentDate)*1000
+    unix_timestamp = int(time.time())
     print(unix_timestamp)
     
     return jsonify({"ts":unix_timestamp})
