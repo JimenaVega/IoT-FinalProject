@@ -7,7 +7,6 @@ from flask import Flask, jsonify, request, render_template
 # creating a Flask app
 app = Flask(__name__)
 
-rate_change = False
 
 rates = {
         'transmission_rate':10,
@@ -25,34 +24,21 @@ rates = {
 def index():
     return render_template('index.html')
 
-# A simple function to calculate the square of a number
-# the number to be squared is sent in the URL when we use GET
-# on the terminal type: curl http://127.0.0.1:5000 / home / 10
-# this returns 100 (square of 10)
-@app.route('/home/<int:num>', methods = ['GET'])
-def disp(num):
-  
-    return jsonify({'data': num**2})
 
-
-@app.route('/api/v1/users/', methods=['POST'])
-def create_user():
+@app.route('/api/data/', methods=['POST'])
+def get_data():
     print('ENTRO')
     try:
         json = request.get_json(force=True)
         print(json)
     except:
         print('error handleado')
-    print('CREATE_USER')
-    print(rate_change)
-    print('--------------')
 
-    return jsonify({'changes': rate_change})
+    return jsonify({'changes': 1})
 
-@app.route('/api/settings/', methods=['GET']) 
+@app.route('/api/unixtime/', methods=['GET']) 
 def get_timestamp():
-
-    unix_timestamp = int(time.time())
+    unix_timestamp = int(time.time()) 
     print(unix_timestamp)
     
     return jsonify({"ts":unix_timestamp})
@@ -75,7 +61,6 @@ def set_rates():
 
 @app.route('/api/rates/', methods=['GET'])
 def get_rates():
-    # rate_change = False
     return jsonify(rates)
 
 
