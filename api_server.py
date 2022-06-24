@@ -2,11 +2,13 @@
 # import necessary libraries and functions
 import time
 from distutils.log import debug
-from flask import Flask, jsonify, request, render_template
-  
+from flask import Flask, jsonify, request, render_template, url_for, redirect
+from pymongo import MongoClient
+
+from bson.json_util import dumps
+
 # creating a Flask app
 app = Flask(__name__)
-
 
 rates = {
         'transmission_rate':10,
@@ -19,10 +21,39 @@ rates = {
         'roll_rate':10,
         'pitch_rate':10
         }
+
+client = MongoClient('localhost', 27017)
+db = client.flask_db
+# create a collection 
+pycom = db.pycom
   
-@app.route('/')
+@app.route('/', methods=('GET', 'POST'))
 def index():
-    return render_template('index.html')
+
+    if request.method=='POST':
+        transmission_rate = request.form['transmission']
+        acc_rate = request.form['acc_rate']
+        light_rate = request.form['light_rate']
+        temp_rate = request.form['temp_rate']
+        hum_rate = request.form['hum_rate']
+        alt_rate = request.form['alt_rate']
+        roll_rate = request.form['roll_rate']
+        pitch_rate = request.form['pitch_rate']
+        degree = request.form['degree']
+        pycom.insert_one({
+                          'transmission_rate':transmission_rate,
+                          'acceleration_rate':acc_rate,
+                          'light_rate':light_rate,
+                          'temperature_rate':temp_rate,
+                          'humidity_rate':hum_rate,
+                          'altitude_rate':alt_rate,
+                          'roll_rate':roll_rate,
+                          'pitch_rate':pitch_rate,
+                          'degree': degree})
+        return redirect(url_for('index'))
+
+    all_pycom = pycom.find()
+    return render_template('index.html', todos=all_pycom)
 
 
 @app.route('/api/data/', methods=['POST'])
@@ -34,13 +65,16 @@ def get_data():
     except:
         print('error handleado')
 
-    return jsonify({'changes': 1})
+    cursor = pycom.find().limit(1).sort([('$natural',-1)])
+    print(dumps(cursor))
+    return dumps(cursor)
 
 @app.route('/api/unixtime/', methods=['GET']) 
 def get_timestamp():
     unix_timestamp = int(time.time()) 
+    print('UNIX')
     print(unix_timestamp)
-    
+
     return jsonify({"ts":unix_timestamp})
 
 # Use with:
