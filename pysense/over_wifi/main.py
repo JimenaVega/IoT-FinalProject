@@ -12,7 +12,7 @@ from machine import RTC
 from urequests import Response
 
 # SERVER_ADDRESS = "http://192.168.1.184"
-SERVER_ADDRESS = "http://192.168.1.101"
+SERVER_ADDRESS = "http://192.168.1.162"
 SERVER_PORT = "5000"
 
 RED = 0x7f0000
@@ -171,7 +171,8 @@ def store_data(samples, interval):
 
 
 def post_method(address, raw_data):
-    response = urequests.post(address, data=raw_data)
+    headers = {'Content-Type': 'application/json'}
+    response = urequests.post(address, data=raw_data, headers=headers)
 
     return response
 
@@ -195,7 +196,9 @@ while True:
     stored_data = store_data(2, 5)
 
     try:
-        response = post_method(SERVER_ADDRESS + ":" + SERVER_PORT + "/api/data/", stored_data)
+        # response = post_method(SERVER_ADDRESS + ":" + SERVER_PORT + "/api/data/", stored_data)
+        response = post_method('http://192.168.1.6:8080/api/v1/hftE8awQVgB6j5NgOFMw/telemetry', '{"temperature":10}')
+        print(response.json())
     except:
         response = ''
         print("POST attempt failed.")
