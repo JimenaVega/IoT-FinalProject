@@ -15,6 +15,9 @@ from urequests import Response
 SERVER_ADDRESS = "http://192.168.1.162"
 SERVER_PORT = "5000"
 
+ADDRESS = "http://192.168.1.107:8080/api/v1/hftE8awQVgB6j5NgOFMw/telemetry"
+headers = {'Content-Type': 'application/json'}
+
 RED = 0x7f0000
 GREEN = 0x007f00
 YELLOW = 0x7f7f00
@@ -191,16 +194,25 @@ sent = 0
 while True:
     try:
         get_response = get_rates(SERVER_ADDRESS + ":" + SERVER_PORT + "/api/rates/")
+        get_response.close()
     except:
         print("GET attempt failed.")
     stored_data = store_data(2, 5)
 
+    # data = ujson.dumps({"temperature": 70+sent})
+    # print(data)
+    # response = urequests.post(ADDRESS, data=data, headers=headers)
+    # response.close()
+
     try:
         # response = post_method(SERVER_ADDRESS + ":" + SERVER_PORT + "/api/data/", stored_data)
-        response = post_method('http://192.168.1.6:8080/api/v1/hftE8awQVgB6j5NgOFMw/telemetry', '{"temperature":10}')
-        print(response.json())
+        data = ujson.dumps({"temperature": 70+sent})
+        print(data)
+        response = urequests.post(ADDRESS, data=stored_data, headers=headers)
+        response.close()
     except:
         response = ''
         print("POST attempt failed.")
 
     sent += 1
+    print("Packets sent: ", sent)
