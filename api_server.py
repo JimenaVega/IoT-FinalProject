@@ -31,6 +31,7 @@ pycom = db.pycom
 def index():
 
     if request.method=='POST':
+        mac_address = request.form['MAC']
         transmission_rate = request.form['transmission']
         acc_rate = request.form['acc_rate']
         light_rate = request.form['light_rate']
@@ -41,6 +42,7 @@ def index():
         pitch_rate = request.form['pitch_rate']
         degree = request.form['degree']
         pycom.insert_one({
+                          'mac_address':mac_address,
                           'transmission_rate':transmission_rate,
                           'acceleration_rate':acc_rate,
                           'light_rate':light_rate,
@@ -53,12 +55,13 @@ def index():
         return redirect(url_for('index'))
 
     all_pycom = pycom.find()
-    return render_template('index.html', todos=all_pycom)
+    return render_template('index.html', pycom=all_pycom)
 
-
+# API receives data from pycom devices
+# As an answer it sends back the last frequencies' document from mongodb
 @app.route('/api/data/', methods=['POST'])
 def get_data():
-    print('ENTRO')
+    
     try:
         json = request.get_json(force=True)
         print(json)
@@ -66,9 +69,10 @@ def get_data():
         print('error handleado')
 
     cursor = pycom.find().limit(1).sort([('$natural',-1)])
-    print(dumps(cursor))
+   
     return dumps(cursor)
 
+# In the first connection with the pycom device the API sends back the unix timestamp
 @app.route('/api/unixtime/', methods=['GET']) 
 def get_timestamp():
     unix_timestamp = int(time.time()) 
@@ -77,14 +81,10 @@ def get_timestamp():
 
     return jsonify({"ts":unix_timestamp})
 
-# Use with:
+# Rates can also be configurated through this api method
 # curl -X POST -H "Content-Type: application/json" -d '{"transmission_rate":1}' http://192.168.1.162:5000/api/set_rates/#
 @app.route('/api/set_rates/', methods=['POST'])
 def set_rates():
-    print('SET_RATES')
-    rate_change = True
-    print(rate_change)
-    print('----------')
     try:
         json = request.get_json(force=False)
         print(json)
@@ -98,7 +98,5 @@ def get_rates():
     return jsonify(rates)
 
 
-# driver function
 if __name__ == '__main__':
-  
     app.run(host='0.0.0.0',port=5000,debug=True)
