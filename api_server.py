@@ -57,11 +57,11 @@ def index():
     all_pycom = pycom.find()
     return render_template('index.html', pycom=all_pycom)
 
-# API receives data from pycom devices
+# API receives a packet of data (sensors info) from pycom devices
 # As an answer it sends back the last frequencies' document from mongodb
 @app.route('/api/data/', methods=['POST'])
 def get_data():
-    
+    print('server in /api/data/')
     try:
         json = request.get_json(force=True)
         print(json)

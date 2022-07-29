@@ -1,6 +1,4 @@
 from network import WLAN
-from pysense import Pysense
-from base import CreateSensors
 import pycom
 import machine
 import urequests
