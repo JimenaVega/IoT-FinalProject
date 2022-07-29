@@ -9,11 +9,11 @@ from machine import Timer
 from machine import RTC
 from urequests import Response
 
-# SERVER_ADDRESS = "http://192.168.1.184"
-SERVER_ADDRESS = "http://192.168.1.162"
+SERVER_ADDRESS = "http://192.168.1.184" #pc alejo
+# SERVER_ADDRESS = "http://192.168.1.162" #pc jime
 SERVER_PORT = "5000"
 
-ADDRESS = "http://192.168.1.107:8080/api/v1/hftE8awQVgB6j5NgOFMw/telemetry"
+ADDRESS = "http://192.168.1.6:8080/api/v1/hftE8awQVgB6j5NgOFMw/telemetry"
 headers = {'Content-Type': 'application/json'}
 
 RED = 0x7f0000
@@ -162,7 +162,7 @@ def store_data(samples, interval):
     for i in range(samples):
         time.sleep(interval)
         aux = dict()
-        aux["ts"] = int(time.time())
+        aux["ts"] = int(time.time()*1000)
         aux["values"] = data_sensors
         stored_data["{0}".format(i)] = aux
 
@@ -170,6 +170,13 @@ def store_data(samples, interval):
 
     return json_stored_data
 
+def get_data():
+    data = dict()
+    data["ts"] = time.time()*1000
+    data["values"] = data_sensors
+    time.sleep(1)
+
+    return ujson.dumps(data)
 
 def post_method(address, raw_data):
     headers = {'Content-Type': 'application/json'}
@@ -195,7 +202,8 @@ while True:
         get_response.close()
     except:
         print("GET attempt failed.")
-    stored_data = store_data(2, 5)
+    # stored_data = store_data(2, 5)
+    data = get_data()
 
     # data = ujson.dumps({"temperature": 70+sent})
     # print(data)
@@ -204,9 +212,8 @@ while True:
 
     try:
         # response = post_method(SERVER_ADDRESS + ":" + SERVER_PORT + "/api/data/", stored_data)
-        data = ujson.dumps({"temperature": 70+sent})
+        response = urequests.post(ADDRESS, data=data, headers=headers)
         print(data)
-        response = urequests.post(ADDRESS, data=stored_data, headers=headers)
         response.close()
     except:
         response = ''
