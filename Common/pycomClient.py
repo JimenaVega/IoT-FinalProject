@@ -18,6 +18,7 @@ from pycoproc_1 import Pycoproc
 # (ssid='LCD3', auth=(WLAN.WPA2, '1cdunc0rd0ba')
 
 class PycomClient():
+    
     self.MAC = None
     self.ssid = None
     self.psswd = None
@@ -28,6 +29,12 @@ class PycomClient():
     self.pycomType = None
     self.unixtime = None
     self.data = None
+
+    def __init__(self, name, Type):
+        self.name = name
+        self.pycomType = Type  # validar
+        self.MAC = binascii.hexlify(machine.unique_id())
+        self._configSensors()
     
     def setInitPycomConfig(self, server, port):
         self.serverAddress = server # validar
@@ -38,12 +45,9 @@ class PycomClient():
         rtc.now()
         rtc.init(time.localtime(self.unixtime.json()['ts']))
 
-    def _setMAC(self):
-        self.MAC = binascii.hexlify(machine.unique_id())  
 
     def connectToNetwork(self, ssid, password):
         pycom.heartbeat(False)
-        self._setMAC()
 
         self.ssid = ssid
         self.psswd = password
@@ -55,8 +59,7 @@ class PycomClient():
         print("WiFi connected succesfully")
         print(wlan.ifconfig())
     
-    def configSensors(self, pycomType):
-        self.pycomType = pycomType
+    def _configSensors(self):
         pyObject = None
 
         if(self.pycomType == PYSCAN):
