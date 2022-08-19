@@ -14,27 +14,29 @@ from Sensors import PyscanSensors, PysenseSensors, PytrackSensors
 from pysense import Pysense
 from pycoproc_1 import Pycoproc
 
-
+PYSCAN = 0
+PYSENSE = 1
+PYTRACK = 2
 # (ssid='LCD3', auth=(WLAN.WPA2, '1cdunc0rd0ba')
 
 class PycomClient():
     
-    self.MAC = None
-    self.ssid = None
-    self.psswd = None
-    self.serverAdress = None
-    self.PORT = None
-    self.RGB = [RED, GREEN, BLUE]
-    self.rates = None
-    self.pycomType = None
-    self.unixtime = None
-    self.data = None
+    
 
-    def __init__(self, name, Type):
+    def __init__(self, name):
         self.name = name
-        self.pycomType = Type  # validar
         self.MAC = binascii.hexlify(machine.unique_id())
         self._configSensors()
+        self.MAC = None
+        self.ssid = None
+        self.psswd = None
+        self.serverAdress = None
+        self.PORT = None
+        self.RGB = [RED, GREEN, BLUE]
+        self.pycomType = None
+        self.unixtime = None
+        self.rates = None
+        self.data = None
     
     def setInitPycomConfig(self, server, port):
         self.serverAddress = server # validar
@@ -59,24 +61,25 @@ class PycomClient():
         print("WiFi connected succesfully")
         print(wlan.ifconfig())
     
-    def _configSensors(self):
+    def configSensors(self, pycomType):
         pyObject = None
 
-        if(self.pycomType == PYSCAN):
+        if(pycomType == PYSCAN):
             py = Pycoproc(Pycoproc.PYSCAN)
             pyObject = PyscanSensors(py)
-        elif(self.pycomType == PYSENSE):
+        elif(pycomType == PYSENSE):
             py = Pysense()
             pyObject = PysenseSensors(py)
-        elif(self.pycomType == PYTRACK):
+        elif(pycomType == PYTRACK):
             py = Pycoproc(Pycoproc.PYTRACK)
             pyObject = PytrackSensors(py)
 
         return pyObject
     
-    def setDeviceRatesFromApi(self, endpoint):
+    def getRatesFromApi(self, endpoint):
         # endpoint = "/api/rates/"
         self.rates = urequests.get(self.serverAddress + ":" + self.PORT + endpoint ).json()
+        return self.rates
     
     def getCurrentRates(self):
         return self.rates
