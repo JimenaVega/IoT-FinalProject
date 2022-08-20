@@ -11,40 +11,39 @@ from machine import RTC
 from urequests import Response
 from const import RED, GREEN, BLUE, PYSCAN, PYSENSE, PYTRACK
 from Sensors import PyscanSensors, PysenseSensors, PytrackSensors
-from pysense import Pysense
+# from pysense import Pysense
 from pycoproc_1 import Pycoproc
 
 
 # (ssid='LCD3', auth=(WLAN.WPA2, '1cdunc0rd0ba')
 
-class PycomClient():
+class PycomClient:
     
-    self.MAC = None
-    self.ssid = None
-    self.psswd = None
-    self.serverAdress = None
-    self.PORT = None
-    self.RGB = [RED, GREEN, BLUE]
-    self.rates = None
-    self.pycomType = None
-    self.unixtime = None
-    self.data = None
-
-    def __init__(self, name, Type):
+    def __init__(self, name):
         self.name = name
-        self.pycomType = Type  # validar
         self.MAC = binascii.hexlify(machine.unique_id())
-        self._configSensors()
-    
-    def setInitPycomConfig(self, server, port):
+        self.ssid = None
+        self.psswd = None
+        self.serverAdress = None 
+        self.PORT = None
+        self.RGB = [RED, GREEN, BLUE]
+        self.rates = None
+        self.unixtime = None
+        self.data = None # Datos de los sensores
+        print("MAC ADDRESS: ", self.MAC)
+        
+    def setServerToConnect(self, server, port):
+        # Conexion con la API server
         self.serverAddress = server # validar
         self.PORT = port    #validar
         self.unixtime = urequests.get(self.serverAddress + ":" + self.PORT)
+        
+    def setUnixTime(self):
+        # Se obtiene el tiempo actual, es necesario conectarse primero a la API
         print("Unix Time: ",self.unixtime.json())
         rtc = RTC()
         rtc.now()
         rtc.init(time.localtime(self.unixtime.json()['ts']))
-
 
     def connectToNetwork(self, ssid, password):
         pycom.heartbeat(False)
@@ -59,24 +58,27 @@ class PycomClient():
         print("WiFi connected succesfully")
         print(wlan.ifconfig())
     
-    def _configSensors(self):
-        pyObject = None
+    # def _configSensors(self):
+    #     pyObject = None
 
-        if(self.pycomType == PYSCAN):
-            py = Pycoproc(Pycoproc.PYSCAN)
-            pyObject = PyscanSensors(py)
-        elif(self.pycomType == PYSENSE):
-            py = Pysense()
-            pyObject = PysenseSensors(py)
-        elif(self.pycomType == PYTRACK):
-            py = Pycoproc(Pycoproc.PYTRACK)
-            pyObject = PytrackSensors(py)
+    #     if(self.pycomType == PYSCAN):
+    #         py = Pycoproc(Pycoproc.PYSCAN)
+    #         pyObject = PyscanSensors(py)
+    #     elif(self.pycomType == PYSENSE):
+    #         py = Pysense()
+    #         pyObject = PysenseSensors(py)
+    #     elif(self.pycomType == PYTRACK):
+    #         py = Pycoproc(Pycoproc.PYTRACK)
+    #         pyObject = PytrackSensors(py)
 
-        return pyObject
+    #     return pyObject
     
     def setDeviceRatesFromApi(self, endpoint):
         # endpoint = "/api/rates/"
         self.rates = urequests.get(self.serverAddress + ":" + self.PORT + endpoint ).json()
+    
+    def setRatesFromJSON(self, json):
+        self.rates = json
     
     def getCurrentRates(self):
         return self.rates
