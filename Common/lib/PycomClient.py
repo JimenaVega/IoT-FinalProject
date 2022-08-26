@@ -36,14 +36,15 @@ class PycomClient:
         # Conexion con la API server
         self.serverAddress = server # validar
         self.PORT = port    #validar
-        print("setServerToConnect")
-        self.unixtime = urequests.get("http://" + self.serverAddress + ":" + self.PORT)
-        print("unixtime: ", self.unixtime)
+        
+        self.unixtime = urequests.get("http://" + self.serverAddress + ":" + self.PORT +  "/api/unixtime/")
+        print("unixtime: ", self.unixtime.json())
+        self._setUnixTime()
     
     def getServerDirection(self):
         return "http://" + self.serverAddress + ":" + self.PORT
         
-    def setUnixTime(self):
+    def _setUnixTime(self):
         # Se obtiene el tiempo actual, es necesario conectarse primero a la API
         print("Unix Time: ",self.unixtime.json())
         rtc = RTC()
@@ -62,6 +63,12 @@ class PycomClient:
             machine.idle()
         print("WiFi connected succesfully")
         print(wlan.ifconfig())
+
+    def post_method(address, raw_data):
+        headers = {'Content-Type': 'application/json'}
+        response = urequests.post(address, data=raw_data, headers=headers)
+
+        return response
     
     # def _configSensors(self):
     #     pyObject = None
@@ -82,8 +89,10 @@ class PycomClient:
         # endpoint = "/api/rates/"
         self.rates = urequests.get(self.serverAddress + ":" + self.PORT + endpoint ).json()
     
-    def setRatesFromJSON(self, json):
+    def setRatesFromJSON(self, json, endpoint):
         self.rates = json
+        print(self.serverAddress + ":" + self.PORT + endpoint)
+        self.post_method(self.serverAddress + ":" + self.PORT + endpoint)
     
     def getCurrentRates(self):
         return self.rates
