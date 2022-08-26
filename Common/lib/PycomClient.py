@@ -36,7 +36,12 @@ class PycomClient:
         # Conexion con la API server
         self.serverAddress = server # validar
         self.PORT = port    #validar
-        self.unixtime = urequests.get(self.serverAddress + ":" + self.PORT)
+        print("setServerToConnect")
+        self.unixtime = urequests.get("http://" + self.serverAddress + ":" + self.PORT)
+        print("unixtime: ", self.unixtime)
+    
+    def getServerDirection(self):
+        return "http://" + self.serverAddress + ":" + self.PORT
         
     def setUnixTime(self):
         # Se obtiene el tiempo actual, es necesario conectarse primero a la API
