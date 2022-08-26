@@ -1,0 +1,26 @@
+POST http://192.168.1.6:8080/api/v1/hftE8awQVgB6j5NgOFMw/telemetry HTTP/1.1
+content-type: application/json
+
+{
+    "temperature": 25
+}
+
+###
+
+POST http://192.168.1.6:8080/api/v1/hftE8awQVgB6j5NgOFMw/telemetry HTTP/1.1
+content-type: application/json
+
+{
+    "temperature": 20
+}
+
+###
+
+POST http://192.168.1.6:8080/api/v1/hftE8awQVgB6j5NgOFMw/telemetry HTTP/1.1
+content-type: application/json
+
+{
+    "temperature": 10
+}
+
+###
