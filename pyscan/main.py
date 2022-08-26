@@ -96,11 +96,15 @@ def light_handler(alarm):
     alarm.cancel()
     alarm = Timer.Alarm(light_handler, rates['light_rate'], periodic=True)
     data_sensors['light'] = pyscan.get_light()
+
 chrono.start()
 transmission_alarm      = Timer.Alarm(transmission_handler, rates['transmission_rate'], periodic=True)
 acceleration_alarm      = Timer.Alarm(acceleration_handler, rates['acceleration_rate'], periodic=True)
 light_alarm             = Timer.Alarm(light_handler, rates['light_rate'], periodic=True)
 
+# def get_init_config(address):
+#     response = urequests.get(address)
+#     new_config =
 
 def get_rates(address):
     global rates
