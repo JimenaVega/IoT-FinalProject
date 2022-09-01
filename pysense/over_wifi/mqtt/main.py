@@ -7,7 +7,7 @@ SERVER_ADDRESS = "192.168.1.6"
 
 wlan = WLAN(mode=WLAN.STA)
 
-wlan.antenna(WLAN.EXT_ANT)
+# wlan.antenna(WLAN.EXT_ANT)
 
 wlan.connect(ssid='LCD', auth=(WLAN.WPA2, '1cdunc0rd0ba'))
 
