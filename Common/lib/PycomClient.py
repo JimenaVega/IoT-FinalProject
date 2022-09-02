@@ -8,7 +8,6 @@ import binascii
 from network import WLAN
 from machine import Timer
 from machine import RTC
-from urequests import Response
 from const import RED, GREEN, BLUE, PYSCAN, PYSENSE, PYTRACK
 from Sensors import PyscanSensors, PysenseSensors, PytrackSensors
 # from pysense import Pysense
@@ -36,10 +35,10 @@ class PycomClient:
         # Conexion con la API server
         self.serverAddress = server # validar
         self.PORT = port    #validar
-        
-        self.unixtime = urequests.get("http://" + self.serverAddress + ":" + self.PORT +  "/api/unixtime/")
+        print("http://" + self.serverAddress + ":" + self.PORT +  "/api/unixtime/")
+        self.unixtime = urequests.get("http://192.168.100.6:5000/api/unixtime/")
         print("unixtime: ", self.unixtime.json())
-        self._setUnixTime()
+        #self._setUnixTime()
     
     def getServerDirection(self):
         return "http://" + self.serverAddress + ":" + self.PORT
@@ -57,12 +56,16 @@ class PycomClient:
         self.ssid = ssid
         self.psswd = password
 
-        wlan = WLAN(mode=WLAN.STA)
+        wlan = WLAN()
+        print(wlan.scan())
         wlan.connect(ssid=self.ssid, auth=(WLAN.WPA2, self.psswd))
-        while not wlan.isconnected():
+        if wlan.isconnected():
+            print("WiFi connected succesfully")
+            print(wlan.ifconfig())
+        else:
+            print("WiFi connection error")
             machine.idle()
-        print("WiFi connected succesfully")
-        print(wlan.ifconfig())
+       
 
     def post_method(address, raw_data):
         headers = {'Content-Type': 'application/json'}
@@ -91,11 +94,16 @@ class PycomClient:
     
     def setRatesFromJSON(self, json, endpoint):
         self.rates = json
+        print("setRatesFromJSON")
         print(self.serverAddress + ":" + self.PORT + endpoint)
         self.post_method(self.serverAddress + ":" + self.PORT + endpoint)
     
     def getCurrentRates(self):
-        return self.rates
+        address = "http://192.168.100.6:5000/api/rates/"
+        response = urequests.get(address)
+        new_rates = response.json()
+        print('NEW RATES ARE:')
+        print(new_rates)
     
     def getUnixTimestamp(self):
         return self.unixtime

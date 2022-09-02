@@ -24,7 +24,7 @@ RGB_RED = (RGB_BRIGHTNESS << 16)
 RGB_GREEN = (RGB_BRIGHTNESS << 8)
 RGB_BLUE = (RGB_BRIGHTNESS)
 
-SERVER_ADDRESS = 'http://192.168.1.162'
+SERVER_ADDRESS = 'http://192.168.100.6'
 SERVER_PORT = ':5000'
 
 SAMPLES = 2
@@ -32,12 +32,24 @@ INTERVAL = 5
 
 MAC = binascii.hexlify(machine.unique_id())
 
+
+SSID = "LCD"
+PASSWD = "1cdunc0rd0ba"
+
 pycom.heartbeat(False)
 wlan = WLAN(mode=WLAN.STA)
-wlan.connect(ssid='LCD3', auth=(WLAN.WPA2, '1cdunc0rd0ba'))
+wlan.connect(ssid=SSID, auth=(WLAN.WPA2, PASSWD))
 
 while not wlan.isconnected():
     machine.idle()
+    
+unixtime = urequests.get(SERVER_ADDRESS + SERVER_PORT + "/api/unixtime/")
+
+print("Unix Time: ", unixtime.json())
+# rtc = RTC()
+# rtc.now()
+# rtc.init(time.localtime(unixtime.json()['ts'])
+
 
 class CreateSensors:
     sensors = {}
@@ -155,7 +167,7 @@ sent = 0
 
 while(1):
     print('PYSCAN IN WHILE')
-    print(data_sensors)
+    # print(data_sensors)
     try:
         get_response = get_rates(SERVER_ADDRESS + SERVER_PORT + "/api/rates/")
         print('SOY PYSCAN GET')
@@ -163,13 +175,13 @@ while(1):
         print('GET attempt failed.')
     
     stored_data = store_data(SAMPLES,INTERVAL) # Stores every INTERVAL of time SAMPLES samples of sensor data
-    print('STORED_DATA')
-    print(stored_data)
-    try:
-        response = post_method(SERVER_ADDRESS + SERVER_PORT + "/api/data/", stored_data)
-        print('SOY PYSCAN POST')
-    except:
-        response = ''
-        print("POST attempt failed.")
+    # print('STORED_DATA')
+    # print(stored_data)
+    # try:
+    #     response = post_method(SERVER_ADDRESS + SERVER_PORT + "/api/data/", stored_data)
+    #     print('SOY PYSCAN POST')
+    # except:
+    #     response = ''
+    #     print("POST attempt failed.")
 
     sent += 1
