@@ -54,12 +54,14 @@ class PycomClient:
         self.serverURL = server + ":" + port
         
     def setUnixtime(self, endpoint):
-        self.unixtime = urequests.get(self.serverURL +  endpoint)
-      
+
+        self.unixtime = urequests.get(self.serverURL + endpoint)
+
         print("unixtime: ", self.unixtime.json())
         rtc = RTC()
         rtc.now()
         rtc.init(time.localtime(self.unixtime.json()['ts']))
+        self.unixtime.close()
         
     def getServerDirection(self):
         return self.serverURL
@@ -68,7 +70,8 @@ class PycomClient:
     def post_method(self, address, raw_data):
         headers = {'Content-Type': 'application/json'}
         response = urequests.post(address, data=raw_data, headers=headers)
-
+        print(response)
+        response.close()
         return response
     
     # def _configSensors(self):
@@ -102,6 +105,7 @@ class PycomClient:
         print(self.serverURL + endpoint)
         changes = self.post_method(self.serverURL + endpoint, rates)
         print(changes)
+       
     
     def getCurrentRates(self):
         address = "http://192.168.100.6:5000/api/rates/"
