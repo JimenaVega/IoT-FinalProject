@@ -1,5 +1,6 @@
 # Using flask to make an api
 # import necessary libraries and functions
+from fcntl import F_SEAL_SEAL
 import time
 from distutils.log import debug
 from flask import Flask, jsonify, request, render_template, url_for, redirect
@@ -71,7 +72,7 @@ def get_data():
     except:
         print('error handleado')
 
-    cursor = pycom.find().limit(1).sort([('$natural',-1)])
+    cursor = pycom_data.find().limit(1).sort([('$natural',-1)])
    
     return dumps(cursor)
 
@@ -90,11 +91,12 @@ def get_timestamp():
 @app.route('/api/set_rates/', methods=['POST'])
 def set_rates():
     try:
-        pycom_rates.insertOne(rcequest.get_json(force=False))
+        json = request.get_json(force=False)
         print(json)
+        # pycom_rates.insertOne(json)
     except:
         print('error handleado')
-    
+        return jsonify({'changes': '0'})
     return jsonify({'changes': '1'})
 
 @app.route('/api/rates/', methods=['GET'])

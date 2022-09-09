@@ -1,7 +1,7 @@
 from PysenseClient import PysenseClient
 import urequests
 
-SERVER_IP = "http://192.168.100.6"
+SERVER_IP = "http://192.168.1.162"
 SERVER_PORT = "5000"
 
 SSID = "LCD"
@@ -27,7 +27,7 @@ pysense = PysenseClient("Pedro")
 
 pysense.connectToNetwork(SSID, PASSWD)
 print("conectado a la red")
-# pysense.setServerToConnect(SERVER_IP, SERVER_PORT)
+pysense.setServerToConnect(SERVER_IP, SERVER_PORT)
 # print("setservertoconnect")
 # pysense.setRatesFromJSON(rates, RATES_ENDPOINT)
 # print("volvio")

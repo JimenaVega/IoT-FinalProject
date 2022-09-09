@@ -69,7 +69,10 @@ class PycomClient:
 
     def post_method(self, address, raw_data):
         headers = {'Content-Type': 'application/json'}
-        response = urequests.post(address, data=raw_data, headers=headers)
+        print("ADDRESSs")
+        print(address)
+
+        response = urequests.post(address, json=raw_data, headers=headers)
         print(response)
         response.close()
         return response
@@ -103,7 +106,7 @@ class PycomClient:
         self.rates = rates
         print("setRatesFromJSON")
         print(self.serverURL + endpoint)
-        changes = self.post_method(self.serverURL + endpoint, rates)
+        changes = self.post_method(self.serverURL + endpoint, self.rates)
         print(changes)
        
     
