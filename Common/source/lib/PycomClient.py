@@ -65,7 +65,7 @@ class PycomClient:
         return self.serverURL
         
 
-    def post_method(address, raw_data):
+    def post_method(self, address, raw_data):
         headers = {'Content-Type': 'application/json'}
         response = urequests.post(address, data=raw_data, headers=headers)
 
@@ -90,11 +90,18 @@ class PycomClient:
         # endpoint = "/api/rates/"
         self.rates = urequests.get(self.serverAddress + ":" + self.PORT + endpoint ).json()
     
-    def setRatesFromJSON(self, json, endpoint):
-        self.rates = json
+    def setRatesFromPycom(self, rates, endpoint):
+        """ Sets rates for every sensor into a mongo database
+
+        Args:
+            rates (_dictonary_): json dictonary with every sensors' sample rate and sending data rate
+            endpoint (_string_): endpoint of the http api to send the new rates file
+        """
+        self.rates = rates
         print("setRatesFromJSON")
-        print(self.serverAddress + ":" + self.PORT + endpoint)
-        self.post_method(self.serverAddress + ":" + self.PORT + endpoint)
+        print(self.serverURL + endpoint)
+        changes = self.post_method(self.serverURL + endpoint, rates)
+        print(changes)
     
     def getCurrentRates(self):
         address = "http://192.168.100.6:5000/api/rates/"
@@ -112,17 +119,17 @@ class PysenseClient(PycomClient):
     def __init__(self, name):
         super().__init__(name)
         
-        # self.pysense = Pysense()
-        #self.pysense = Pycoproc(Pycoproc.PYSENSE)
+        #self.pysense = Pysense()
+        self.pysense = Pycoproc(Pycoproc.PYSENSE)
         self.sensors = dict()
         print("Se creo el pysense: ", name)
         
-        # self.sensors["light"]=LTR329ALS01(self.pysense)
-        # self.sensors["humidity"]=SI7006A20(self.pysense)
-        # self.sensors["altitude"]=MPL3115A2(self.pysense,mode=ALTITUDE)
-        # self.sensors["acceleration"]=LIS2HH12(self.pysense)
+        self.sensors["light"]=LTR329ALS01(self.pysense)
+        self.sensors["humidity"]=SI7006A20(self.pysense)
+        self.sensors["altitude"]=MPL3115A2(self.pysense,mode=ALTITUDE)
+        self.sensors["acceleration"]=LIS2HH12(self.pysense)
         
-        # self.chrono = Timer.Chrono()
+        self.chrono = Timer.Chrono()
         
     def get_acceleration(self):
         # Return a tuple of three elements

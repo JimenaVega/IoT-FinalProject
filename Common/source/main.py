@@ -7,7 +7,7 @@ SERVER_IP = "http://192.168.100.6"
 SERVER_PORT = "5000"
 
 SSID = "LCD"
-PASSWD = ""
+PASSWD = "1cdunc0rd0ba"
 
 DATA_ENDPOINT = "/api/data/"
 RATES_ENDPOINT = "/api/set_rates/"
@@ -30,13 +30,12 @@ pysense = PysenseClient("Pedro")
 pysense.connectToNetwork(SSID, PASSWD)
 
 
-print("conectado a la red")
 pysense.setServerToConnect(SERVER_IP, SERVER_PORT)
 pysense.setUnixtime(TIME_ENDPOINT)
-print("setservertoconnect")
-# # pysense.setRatesFromJSON(rates, RATES_ENDPOINT)
-# # print("volvio")
-# unixtime = urequests.get(SERVER_IP + ":" + SERVER_PORT + "/api/unixtime/")
-# print(unixtime)
+
+
+pysense.setRatesFromPycom(rates, RATES_ENDPOINT)
+print("volvio")
+
 # pysense.getCurrentRates()
 # print("getCurrentRates")
