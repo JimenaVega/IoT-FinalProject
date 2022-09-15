@@ -20,6 +20,18 @@ YELLOW = 0x7f7f00
 ORANGE = 0xffa500
 NO_COLOUR = 0x000000
 
+LED_STATE = False
+
+def switch_led():
+    global LED_STATE
+
+    if LED_STATE:
+        pycom.rgbled(0x000000)
+        LED_STATE = False
+    elif not LED_STATE:
+        pycom.rgbled(0x330033)
+        LED_STATE = True
+
 pycom.heartbeat(False)
 
 wlan = WLAN(mode=WLAN.STA)
@@ -42,14 +54,21 @@ def subscribe_callback(topic, msg):
     global unixtime
     response = ujson.loads(msg.decode('utf-8'))
 
-    if response["device_id"] == DEVICE_ID:
-        unixtime = response["unixtime"]
+    print("Topic: {0} - Message: {1}".format(topic, msg))
+
+    if "v1/devices/me/rpc/response/" in topic:
+        if response["device_id"] == DEVICE_ID:
+            unixtime = response["unixtime"]
+    elif "v1/devices/me/rpc/request/" in topic:
+        if response["method"] == "switch_led":
+            switch_led()
 
 mqtt = robust.MQTTClient("FP23", SERVER_ADDRESS, port=1883, user=b"FP23", password=b"23", keepalive=60)
 mqtt.set_callback(subscribe_callback)
 mqtt.connect(clean_session=False)
 
 mqtt.subscribe(topic=b"v1/devices/me/rpc/response/+")
+mqtt.subscribe(topic=b"v1/devices/me/rpc/request/+")
 unixtime_request = mqtt.publish(topic=b"v1/devices/me/rpc/request/"+DEVICE_ID, msg=ujson.dumps(request))
 
 mqtt.wait_msg()
@@ -68,12 +87,12 @@ pySensors = CreateSensors(py)
 data_sensors = {
     'acceleration': pySensors.get_acceleration(),
     'light': pySensors.get_light(),
-    'temperature': pySensors.get_temperature()*100,
-    'humidity': pySensors.get_humidity()*100,
-    'altitude': pySensors.get_altitude()*100,
-    'battery_voltage': py.read_battery_voltage()*100,
-    'roll': pySensors.get_roll()*1000,
-    'pitch': pySensors.get_pitch()*1000
+    'temperature': pySensors.get_temperature(),
+    'humidity': pySensors.get_humidity(),
+    'altitude': pySensors.get_altitude(),
+    'battery_voltage': py.read_battery_voltage(),
+    'roll': pySensors.get_roll(),
+    'pitch': pySensors.get_pitch()
     }
 
 rates = {
@@ -110,37 +129,37 @@ def light_handler(alarm):
 def temperature_handler(alarm):
     alarm.cancel()
     alarm = Timer.Alarm(temperature_handler, rates['temperature_rate'], periodic=True)
-    data_sensors['temperature'] = pySensors.get_temperature()*100
+    data_sensors['temperature'] = pySensors.get_temperature()
 
 
 def humidity_handler(alarm):
     alarm.cancel()
     alarm = Timer.Alarm(humidity_handler, rates['humidity_rate'], periodic=True)
-    data_sensors['humidity'] = pySensors.get_humidity()*100
+    data_sensors['humidity'] = pySensors.get_humidity()
 
 
 def altitude_handler(alarm):
     alarm.cancel()
     alarm = Timer.Alarm(altitude_handler, rates['altitude_rate'], periodic=True)
-    data_sensors['altitude'] = pySensors.get_altitude()*100
+    data_sensors['altitude'] = pySensors.get_altitude()
 
 
 def battery_voltage_handler(alarm):
     alarm.cancel()
     alarm = Timer.Alarm(battery_voltage_handler, rates['battery_voltage_rate'], periodic=True)
-    data_sensors['battery_voltage'] = py.read_battery_voltage()*100
+    data_sensors['battery_voltage'] = py.read_battery_voltage()
 
 
 def roll_handler(alarm):
     alarm.cancel()
     alarm = Timer.Alarm(roll_handler, rates['roll_rate'], periodic=True)
-    data_sensors['roll'] = pySensors.get_roll()*1000
+    data_sensors['roll'] = pySensors.get_roll()
 
 
 def pitch_handler(alarm):
     alarm.cancel()
     alarm = Timer.Alarm(pitch_handler, rates['pitch_rate'], periodic=True)
-    data_sensors['pitch'] = pySensors.get_pitch()*1000
+    data_sensors['pitch'] = pySensors.get_pitch()
 
 
 chrono.start()
@@ -194,7 +213,7 @@ def get_data():
 sent = 0
 
 while True:
-
+    mqtt.check_msg()
     data = get_data()
     mqtt.publish("v1/devices/me/telemetry", data)
 
