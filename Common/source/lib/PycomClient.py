@@ -21,8 +21,6 @@ from machine import Timer
 from pycoproc_1 import Pycoproc
 
 
-# (ssid='LCD3', auth=(WLAN.WPA2, '1cdunc0rd0ba')
-
 class PycomClient:
     
     def __init__(self, name):
