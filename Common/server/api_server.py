@@ -24,7 +24,7 @@ rates = {
         }
         
 client = MongoClient('localhost', 27017)
-db = client.flask_db
+db = client.http_iot
 # create a collection in the db
 pycom_data = db.pycom_data
 pycom_rates = db.pycom_rates
@@ -93,7 +93,7 @@ def set_rates():
     try:
         json = request.get_json(force=False)
         print(json)
-        # pycom_rates.insertOne(json)
+        pycom_rates.insertOne(json)
     except:
         print('error handleado')
         return jsonify({'changes': '0'})

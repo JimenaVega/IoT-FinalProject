@@ -32,10 +32,10 @@ pysense.connectToNetwork(SSID, PASSWD)
 
 pysense.setServerToConnect(SERVER_IP, SERVER_PORT)
 pysense.setUnixtime(TIME_ENDPOINT)
-
+print("setUnixtime")
 
 pysense.setRatesFromPycom(rates, RATES_ENDPOINT)
-print("volvio")
+print("setRatesFromPycom")
 
-# pysense.getCurrentRates()
+#pysense.getCurrentRates()
 # print("getCurrentRates")

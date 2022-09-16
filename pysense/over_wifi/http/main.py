@@ -29,8 +29,8 @@ wlan = WLAN(mode=WLAN.STA)
 SERVER_ADDRESS = 'http://192.168.100.6'
 SERVER_PORT = '5000'
 
-SSID = "FamiliaVega"
-PASSWD = "CC64A67A35B9"
+SSID = "LCD"
+PASSWD = "1cdunc0rd0ba"
 
 
 # wlan.connect(ssid='LCD-IoT', auth=(WLAN.WPA2, '1cdunc0rd0ba'))

@@ -62,14 +62,28 @@ mkdir environments
 cd environments
 python3 -m venv <env-name>
 source activate <env-name>
+source ~/environments/<env-name>/bin/activate 
+
 ```
+Disable env: inside env
+```
+deactivate
+```
+
 
 2. Install flask and pymongo:
    
 ```
 pip3 install Flask pymongo
 ```
-
+3. Export environment variable:
+```
+export FLASK_APP=api_server.py
+```
+4. To change flask port:
+```
+export FLASK_RUN_PORT=<PORT_NUMBER>
+```
 
 > TOAST UI Editor uses [npm workspace](https://docs.npmjs.com/cli/v7/using-npm/workspaces/), so you need to set the environment based on [npm7](https://github.blog/2021-02-02-npm-7-is-now-generally-available/). If subversion is used, dependencies must be installed by moving direct paths per package.
 
