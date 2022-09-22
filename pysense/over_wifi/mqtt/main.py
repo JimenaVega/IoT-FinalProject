@@ -51,7 +51,7 @@ request = {
 unixtime = 0
 
 rates = {
-    'transmission_rate': 5,
+    'transmission_rate': 3,
     'acceleration_rate': 5,
     'light_rate': 5,
     'temperature_rate': 5,
@@ -66,7 +66,7 @@ def subscribe_callback(topic, msg):
     global unixtime
     response = ujson.loads(msg.decode('utf-8'))
 
-    print("Topic: {0} - Message: {1}".format(topic, msg))
+    request_id = topic[len("v1/devices/me/rpc/request/"):len(topic)]
 
     if "v1/devices/me/rpc/response/" in topic:
         if response["device_id"] == DEVICE_ID:
@@ -76,22 +76,48 @@ def subscribe_callback(topic, msg):
             switch_led()
         elif response["method"] == "set_transmission_rate":
             rates['transmission_rate'] = response["params"]
+        elif response["method"] == "get_transmission_rate":
+            mqtt.publish(topic=b"v1/devices/me/rpc/response/"+request_id, msg=ujson.dumps(rates['transmission_rate']))
+
         elif response["method"] == "set_acceleration_rate":
             rates['acceleration_rate'] = response["params"]
+        elif response["method"] == "get_acceleration_rate":
+            mqtt.publish(topic=b"v1/devices/me/rpc/response/"+request_id, msg=ujson.dumps(rates['acceleration_rate']))
+
         elif response["method"] == "set_light_rate":
             rates['light_rate'] = response["params"]
+        elif response["method"] == "get_light_rate":
+            mqtt.publish(topic=b"v1/devices/me/rpc/response/"+request_id, msg=ujson.dumps(rates['light_rate']))
+
         elif response["method"] == "set_temperature_rate":
             rates['temperature_rate'] = response["params"]
+        elif response["method"] == "get_temperature_rate":
+            mqtt.publish(topic=b"v1/devices/me/rpc/response/"+request_id, msg=ujson.dumps(rates['temperature_rate']))
+
         elif response["method"] == "set_humidity_rate":
             rates['humidity_rate'] = response["params"]
+        elif response["method"] == "get_humidity_rate":
+            mqtt.publish(topic=b"v1/devices/me/rpc/response/"+request_id, msg=ujson.dumps(rates['humidity_rate']))
+
         elif response["method"] == "set_altitude_rate":
             rates['altitude_rate'] = response["params"]
+        elif response["method"] == "get_altitude_rate":
+            mqtt.publish(topic=b"v1/devices/me/rpc/response/"+request_id, msg=ujson.dumps(rates['altitude_rate']))
+
         elif response["method"] == "set_battery_voltage_rate":
             rates['battery_voltage_rate'] = response["params"]
+        elif response["method"] == "get_battery_voltage_rate":
+            mqtt.publish(topic=b"v1/devices/me/rpc/response/"+request_id, msg=ujson.dumps(rates['battery_voltage_rate']))
+
         elif response["method"] == "set_roll_rate":
             rates['roll_rate'] = response["params"]
+        elif response["method"] == "get_roll_rate":
+            mqtt.publish(topic=b"v1/devices/me/rpc/response/"+request_id, msg=ujson.dumps(rates['roll_rate']))
+
         elif response["method"] == "set_pitch_rate":
             rates['pitch_rate'] = response["params"]
+        elif response["method"] == "get_pitch_rate":
+            mqtt.publish(topic=b"v1/devices/me/rpc/response/"+request_id, msg=ujson.dumps(rates['pitch_rate']))
 
 
 mqtt = robust.MQTTClient("FP23", SERVER_ADDRESS, port=1883, user=b"FP23", password=b"23", keepalive=60)
