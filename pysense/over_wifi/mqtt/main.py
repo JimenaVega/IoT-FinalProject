@@ -50,6 +50,18 @@ request = {
 
 unixtime = 0
 
+rates = {
+    'transmission_rate': 5,
+    'acceleration_rate': 5,
+    'light_rate': 5,
+    'temperature_rate': 5,
+    'humidity_rate': 5,
+    'altitude_rate': 5,
+    'battery_voltage_rate': 5,
+    'roll_rate': 5,
+    'pitch_rate': 5
+}
+
 def subscribe_callback(topic, msg):
     global unixtime
     response = ujson.loads(msg.decode('utf-8'))
@@ -62,6 +74,25 @@ def subscribe_callback(topic, msg):
     elif "v1/devices/me/rpc/request/" in topic:
         if response["method"] == "switch_led":
             switch_led()
+        elif response["method"] == "set_transmission_rate":
+            rates['transmission_rate'] = response["params"]
+        elif response["method"] == "set_acceleration_rate":
+            rates['acceleration_rate'] = response["params"]
+        elif response["method"] == "set_light_rate":
+            rates['light_rate'] = response["params"]
+        elif response["method"] == "set_temperature_rate":
+            rates['temperature_rate'] = response["params"]
+        elif response["method"] == "set_humidity_rate":
+            rates['humidity_rate'] = response["params"]
+        elif response["method"] == "set_altitude_rate":
+            rates['altitude_rate'] = response["params"]
+        elif response["method"] == "set_battery_voltage_rate":
+            rates['battery_voltage_rate'] = response["params"]
+        elif response["method"] == "set_roll_rate":
+            rates['roll_rate'] = response["params"]
+        elif response["method"] == "set_pitch_rate":
+            rates['pitch_rate'] = response["params"]
+
 
 mqtt = robust.MQTTClient("FP23", SERVER_ADDRESS, port=1883, user=b"FP23", password=b"23", keepalive=60)
 mqtt.set_callback(subscribe_callback)
@@ -86,7 +117,8 @@ pySensors = CreateSensors(py)
 
 data_sensors = {
     'acceleration': pySensors.get_acceleration(),
-    'light': pySensors.get_light(),
+    'blue_light': pySensors.get_light()[0],
+    'red_light': pySensors.get_light()[1],
     'temperature': pySensors.get_temperature(),
     'humidity': pySensors.get_humidity(),
     'altitude': pySensors.get_altitude(),
@@ -95,22 +127,13 @@ data_sensors = {
     'pitch': pySensors.get_pitch()
     }
 
-rates = {
-    'transmission_rate': 5,
-    'acceleration_rate': 5,
-    'light_rate': 5,
-    'temperature_rate': 5,
-    'humidity_rate': 5,
-    'altitude_rate': 5,
-    'battery_voltage_rate': 5,
-    'roll_rate': 5,
-    'pitch_rate': 5
-}
-
 chrono = Timer.Chrono()
 
 def transmission_handler(alarm):
     alarm.cancel()
+    data = get_data()
+    mqtt.publish("v1/devices/me/telemetry", data)
+    print("Transmission every {} seconds.".format(rates['transmission_rate']))
     alarm = Timer.Alarm(transmission_handler, rates['transmission_rate'], periodic=True)
 
 
@@ -123,7 +146,8 @@ def acceleration_handler(alarm):
 def light_handler(alarm):
     alarm.cancel()
     alarm = Timer.Alarm(light_handler, rates['light_rate'], periodic=True)
-    data_sensors['light'] = pySensors.get_light()
+    data_sensors['blue_light'] = pySensors.get_light()[0]
+    data_sensors['red_light'] = pySensors.get_light()[1]
 
 
 def temperature_handler(alarm):
@@ -210,14 +234,8 @@ def get_data():
     return ujson.dumps(data)
 
 
-sent = 0
-
 while True:
     mqtt.check_msg()
-    data = get_data()
-    mqtt.publish("v1/devices/me/telemetry", data)
-
-    sent += 1
-    print("Packets sent: ", sent)
-    print(type(data))
-    print(data)
+    # data = get_data()
+    # mqtt.publish("v1/devices/me/telemetry", data)
+    # print("Transmission every {} seconds.".format(rates['transmission_rate']))
