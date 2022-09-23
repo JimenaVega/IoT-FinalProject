@@ -1,8 +1,4 @@
-
-from ast import Try
-from operator import truediv
 from PycomClient import PysenseClient
-import urequests
 
 
 SERVER_IP = "http://192.168.1.162"
@@ -43,8 +39,8 @@ print("setRatesFromPycom")
 # Get rates setted for this device from db 
 #pysense.getRatesFromdb()
 
-# Initialize sampling of all data 
-pysense.initTimer()
+# Initialize collection of all data 
+pysense.initTimers()
 
 while True:
         # POST data to server

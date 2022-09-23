@@ -53,13 +53,16 @@ class PycomClient:
         
     def setUnixtime(self, endpoint):
 
-        self.unixtime = urequests.get(self.serverURL + endpoint)
-
-        print("unixtime: ", self.unixtime.json())
-        rtc = RTC()
-        rtc.now()
-        rtc.init(time.localtime(self.unixtime.json()['ts']))
-        self.unixtime.close()
+        try: 
+            self.unixtime = urequests.get(self.serverURL + endpoint)
+            print("unixtime: ", self.unixtime.json())
+            rtc = RTC()
+            rtc.now()
+            rtc.init(time.localtime(self.unixtime.json()['ts']))
+            self.unixtime.close()
+        except:
+            print("Error requestin UNIX TIME from API.")
+ 
         
     def getServerDirection(self):
         return self.serverURL
@@ -92,7 +95,8 @@ class PycomClient:
     
     def setDeviceRatesFromApi(self, endpoint):
         # endpoint = "/api/rates/"
-        self.rates = urequests.get(self.serverAddress + ":" + self.PORT + endpoint ).json()
+        response = urequests.get(self.serverAddress + ":" + self.PORT + endpoint ).json()
+        self.rates = response.json()
     
     def setRatesFromPycom(self, rates, endpoint):
         """ Sets rates for every sensor into a mongo database
@@ -125,8 +129,6 @@ class PycomClient:
 
         return ujson.dumps(data)
     
-    
-
 
 class PysenseClient(PycomClient):
 
@@ -220,14 +222,14 @@ class PysenseClient(PycomClient):
 
     def _roll_handler(self, alarm):
         alarm.cancel()
-        alarm = Timer.Alarm(self.roll_handler,  self.rates['roll_rate'], periodic=True)
+        alarm = Timer.Alarm(self._roll_handler,  self.rates['roll_rate'], periodic=True)
         self.data_sensors['roll'] = self.get_roll() * 1000
         # print("[{}]: Roll alarm every {} seconds.".format(int(chrono.read()), rates['roll_rate']))
 
 
     def _pitch_handler(self, alarm):
         alarm.cancel()
-        alarm = Timer.Alarm(self.pitch_handler, self.rates['pitch_rate'], periodic=True)
+        alarm = Timer.Alarm(self._pitch_handler, self.rates['pitch_rate'], periodic=True)
         self.data_sensors['pitch'] = self.get_pitch() * 1000
         # print("[{}]: Pitch alarm every {} seconds.".format(int(chrono.read()), rates['pitch_rate']))
     
@@ -242,6 +244,7 @@ class PysenseClient(PycomClient):
         roll_alarm              = Timer.Alarm(self._roll_handler, self.rates['roll_rate'], periodic=True)
         pitch_alarm             = Timer.Alarm(self._pitch_handler, self.rates['pitch_rate'], periodic=True)
 
+        print("Init timers DONE ")
         # alarm_sets = []
 
         # alarm_sets.append([transmission_alarm, self._transmission_handler, 'transmission_rate'])

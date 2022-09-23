@@ -90,13 +90,14 @@ def get_timestamp():
 # curl -X POST -H "Content-Type: application/json" -d '{"transmission_rate":1}' http://192.168.1.162:5000/api/set_rates/#
 @app.route('/api/set_rates/', methods=['POST'])
 def set_rates():
-    # try:
-    json = request.get_json(force=False)
-    print(json)
-    pycom_rates.insert_one(json)
-    # except:
-    #     print('error handleado')
-    #     return jsonify({'changes': '0'})
+    try:
+        json = request.get_json(force=False)
+        print(json)
+        pycom_rates.insert_one(json)
+    except:
+        print('error handleado')
+        return jsonify({'changes': '0'})
+        
     return jsonify({'changes': '1'})
 
 @app.route('/api/rates/', methods=['GET'])

@@ -84,6 +84,10 @@ export FLASK_APP=api_server.py
 ```
 export FLASK_RUN_PORT=<PORT_NUMBER>
 ```
+5. Activate env and run server 
+```
+ flask run --host=0.0.0.0
+ ```
 
 > TOAST UI Editor uses [npm workspace](https://docs.npmjs.com/cli/v7/using-npm/workspaces/), so you need to set the environment based on [npm7](https://github.blog/2021-02-02-npm-7-is-now-generally-available/). If subversion is used, dependencies must be installed by moving direct paths per package.
 
