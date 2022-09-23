@@ -32,7 +32,7 @@ class PycomClient:
         self.RGB = [RED, GREEN, BLUE]
         self.rates = None
         self.unixtime = None
-        self.data = None # Datos de los sensores
+        self.data_sensors = dict() # Datos de los sensores
         print("MAC ADDRESS: ", self.MAC)
        
     def connectToNetwork(self, ssid, password):
@@ -65,12 +65,12 @@ class PycomClient:
         return self.serverURL
         
 
-    def post_method(self, address, raw_data):
+    def postData(self, endpoint, raw_data):
         headers = {'Content-Type': 'application/json'}
         print("ADDRESSs")
-        print(address)
+        print(self.serverURL + endpoint)
 
-        response = urequests.post(address, json=raw_data, headers=headers)
+        response = urequests.post(self.serverURL + endpoint, json=raw_data, headers=headers)
         print(response)
         response.close()
         return response
@@ -104,20 +104,29 @@ class PycomClient:
         self.rates = rates
         print("setRatesFromJSON")
         print(self.serverURL + endpoint)
-        changes = self.post_method(self.serverURL + endpoint, self.rates)
+        changes = self.postData(endpoint, self.rates)
         print(changes)
        
     
-    def getCurrentRates(self):
-        address = "http://192.168.100.6:5000/api/rates/"
-        response = urequests.get(address)
+    def getCurrentRates(self, endpoint):
+        response = urequests.get(self.serverURL + endpoint)
         new_rates = response.json()
         print('NEW RATES ARE:')
         print(new_rates)
     
     def getUnixTimestamp(self):
         return self.unixtime
+
+    def getDataFromSensors(self):
+        data = dict()
+        data["ts"] = time.time()*1000
+        data["values"] = self.data_sensors
+        time.sleep(1)
+
+        return ujson.dumps(data)
     
+    
+
 
 class PysenseClient(PycomClient):
 
@@ -163,61 +172,85 @@ class PysenseClient(PycomClient):
         
     def _transmission_handler(self, alarm):
         alarm.cancel()
-        alarm = Timer.Alarm(transmission_handler, self.rates['transmission_rate'], periodic=True)
+        alarm = Timer.Alarm(self._transmission_handler, self.rates['transmission_rate'], periodic=True)
         # print("[{}]: Transmission alarm every {} seconds.".format(int(chrono.read()), rates['transmission_rate']))
 
 
     def _acceleration_handler(self, alarm):
         alarm.cancel()
-        alarm = Timer.Alarm(acceleration_handler, self.rates['acceleration_rate'], periodic=True)
-        data_sensors['acceleration'] = self.get_acceleration()
+        alarm = Timer.Alarm(self._acceleration_handler, self.rates['acceleration_rate'], periodic=True)
+        self.data_sensors['acceleration'] = self.get_acceleration()
         # print("[{}]: Acceleration alarm every {} seconds.".format(int(chrono.read()), rates['acceleration_rate']))
 
 
     def _light_handler(self, alarm):
         alarm.cancel()
-        alarm = Timer.Alarm(light_handler, self.rates['light_rate'], periodic=True)
-        data_sensors['light'] = self.get_light()
+        alarm = Timer.Alarm(self._light_handler, self.rates['light_rate'], periodic=True)
+        self.data_sensors['light'] = self.get_light()
         # print("[{}]: Light alarm every {} seconds.".format(int(chrono.read()), rates['light_rate']))
 
     # VER SI ACEPTA DOBLE ARGUMENTO
     def _temperature_handler(self, alarm):
         alarm.cancel()
-        alarm = Timer.Alarm(temperature_handler, self.rates['temperature_rate'], periodic=True)
-        data_sensors['temperature'] = self.get_temperature()*100
+        alarm = Timer.Alarm(self._temperature_handler, self.rates['temperature_rate'], periodic=True)
+        self.data_sensors['temperature'] = self.get_temperature() * 100
         # print("[{}]: Temperature alarm every {} seconds.".format(int(chrono.read()), rates['temperature_rate']))
 
 
     def _humidity_handler(self, alarm):
         alarm.cancel()
-        alarm = Timer.Alarm(humidity_handler, self.rates['humidity_rate'], periodic=True)
-        data_sensors['humidity'] = self.get_humidity()*100
+        alarm = Timer.Alarm(self._humidity_handler, self.rates['humidity_rate'], periodic=True)
+        self.data_sensors['humidity'] = self.get_humidity() * 100
         # print("[{}]: Humidity alarm every {} seconds.".format(int(chrono.read()), rates['humidity_rate']))
 
 
     def _altitude_handler(self, alarm):
         alarm.cancel()
-        alarm = Timer.Alarm(altitude_handler, self.rates['altitude_rate'], periodic=True)
-        data_sensors['altitude'] = self.get_altitude()*100
+        alarm = Timer.Alarm(self._altitude_handler, self.rates['altitude_rate'], periodic=True)
+        self.data_sensors['altitude'] = self.get_altitude() * 100
         # print("[{}]: Altitude alarm every {} seconds.".format(int(chrono.read()), rates['altitude_rate']))
 
 
     def _battery_voltage_handler(self, alarm):
         alarm.cancel()
-        alarm = Timer.Alarm(battery_voltage_handler,  self.rates['battery_voltage_rate'], periodic=True)
-        data_sensors['battery_voltage'] = py.read_battery_voltage()*100
+        alarm = Timer.Alarm(self._battery_voltage_handler,  self.rates['battery_voltage_rate'], periodic=True)
+        self.data_sensors['battery_voltage'] = self.pysense.read_battery_voltage() * 100
         # print("[{}]: Battery voltage alarm every {} seconds.".format(int(chrono.read()), rates['battery_voltage_rate']))
 
 
     def _roll_handler(self, alarm):
         alarm.cancel()
-        alarm = Timer.Alarm(roll_handler,  self.rates['roll_rate'], periodic=True)
-        data_sensors['roll'] = pySensors.get_roll()*1000
+        alarm = Timer.Alarm(self.roll_handler,  self.rates['roll_rate'], periodic=True)
+        self.data_sensors['roll'] = self.get_roll() * 1000
         # print("[{}]: Roll alarm every {} seconds.".format(int(chrono.read()), rates['roll_rate']))
 
 
     def _pitch_handler(self, alarm):
         alarm.cancel()
-        alarm = Timer.Alarm(pitch_handler, rates['pitch_rate'], periodic=True)
-        data_sensors['pitch'] = pySensors.get_pitch()*1000
+        alarm = Timer.Alarm(self.pitch_handler, self.rates['pitch_rate'], periodic=True)
+        self.data_sensors['pitch'] = self.get_pitch() * 1000
         # print("[{}]: Pitch alarm every {} seconds.".format(int(chrono.read()), rates['pitch_rate']))
+    
+    def initTimers(self):
+        transmission_alarm      = Timer.Alarm(self._transmission_handler, self.rates['transmission_rate'], periodic=True)
+        acceleration_alarm      = Timer.Alarm(self._acceleration_handler, self.rates['acceleration_rate'], periodic=True)
+        light_alarm             = Timer.Alarm(self._light_handler, self.rates['light_rate'], periodic=True)
+        temperature_alarm       = Timer.Alarm(self._temperature_handler, self.rates['temperature_rate'], periodic=True)
+        humidity_rate           = Timer.Alarm(self._humidity_handler, self.rates['humidity_rate'], periodic=True)
+        altitude_alarm          = Timer.Alarm(self._altitude_handler, self.rates['altitude_rate'], periodic=True)
+        battery_voltage_alarm   = Timer.Alarm(self._battery_voltage_handler, self.rates['battery_voltage_rate'], periodic=True)
+        roll_alarm              = Timer.Alarm(self._roll_handler, self.rates['roll_rate'], periodic=True)
+        pitch_alarm             = Timer.Alarm(self._pitch_handler, self.rates['pitch_rate'], periodic=True)
+
+        # alarm_sets = []
+
+        # alarm_sets.append([transmission_alarm, self._transmission_handler, 'transmission_rate'])
+        # alarm_sets.append([acceleration_alarm, self._acceleration_handler, 'acceleration_rate'])
+        # alarm_sets.append([light_alarm, self._light_handler, 'light_rate'])
+        # alarm_sets.append([temperature_alarm, self._temperature_handler, 'temperature_rate'])
+        # alarm_sets.append([humidity_rate, self._humidity_handler, 'humidity_rate'])
+        # alarm_sets.append([altitude_alarm, self._altitude_handler, 'altitude_rate'])
+        # alarm_sets.append([battery_voltage_alarm, self._battery_voltage_handler, 'battery_voltage_rate'])
+        # alarm_sets.append([roll_alarm, self._roll_handler, 'roll_rate'])
+        # alarm_sets.append([pitch_alarm, self._pitch_handler, 'pitch_rate'])
+

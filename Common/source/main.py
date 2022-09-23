@@ -1,4 +1,6 @@
 
+from ast import Try
+from operator import truediv
 from PycomClient import PysenseClient
 import urequests
 
@@ -34,8 +36,21 @@ pysense.setServerToConnect(SERVER_IP, SERVER_PORT)
 pysense.setUnixtime(TIME_ENDPOINT)
 print("setUnixtime")
 
+# Optional
 pysense.setRatesFromPycom(rates, RATES_ENDPOINT)
 print("setRatesFromPycom")
 
-#pysense.getCurrentRates()
-# print("getCurrentRates")
+# Get rates setted for this device from db 
+#pysense.getRatesFromdb()
+
+# Initialize sampling of all data 
+pysense.initTimer()
+
+while True:
+        # POST data to server
+        sensorsData = pysense.getDataFromSensors()
+
+        try:
+            pysense.postData(DATA_ENDPOINT, sensorsData)   
+        except:
+            print("Pysense couldn't POST data to api")

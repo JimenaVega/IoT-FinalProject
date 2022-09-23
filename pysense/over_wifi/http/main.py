@@ -9,9 +9,7 @@ from machine import Timer
 from machine import RTC
 from urequests import Response
 
-# SERVER_ADDRESS = "http://192.168.1.184" #pc alejo
-# # SERVER_ADDRESS = "http://192.168.1.162" #pc jime
-# SERVER_PORT = "5000"
+
 
 ADDRESS = "http://192.168.1.6:8080/api/v1/hftE8awQVgB6j5NgOFMw/telemetry"
 headers = {'Content-Type': 'application/json'}
@@ -26,6 +24,7 @@ pycom.heartbeat(False)
 
 wlan = WLAN(mode=WLAN.STA)
 
+# SERVER_ADDRESS = "http://192.168.1.184" #pc alejo
 SERVER_ADDRESS = 'http://192.168.100.6'
 SERVER_PORT = '5000'
 
