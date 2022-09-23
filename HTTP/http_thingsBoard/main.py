@@ -1,8 +1,9 @@
 from PycomClient import PysenseClient
 
 
-SERVER_IP = "http://192.168.1.162"
-SERVER_PORT = "5000"
+SERVER_API = "http://192.168.1.162:5000"
+SERVER_ADDRESS = "http://192.168.1.6:8080/api/v1/sAJ20eaXKIBDjGzHaDj0/telemetry"
+
 SSID = "LCD"
 PASSWD = "1cdunc0rd0ba"
 
@@ -27,8 +28,8 @@ pysense = PysenseClient("Pedro")
 pysense.connectToNetwork(SSID, PASSWD)
 
 
-pysense.setServerToConnect(SERVER_IP, SERVER_PORT)
-pysense.setUnixtime(TIME_ENDPOINT)
+pysense.setServerToConnect(SERVER_ADDRESS)
+pysense.setUnixtime(SERVER_API + TIME_ENDPOINT)
 print("setUnixtime")
 
 # Optional

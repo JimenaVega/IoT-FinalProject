@@ -3,6 +3,7 @@ from PycomClient import PysenseClient
 
 SERVER_IP = "http://192.168.1.162"
 SERVER_PORT = "5000"
+
 SSID = "LCD"
 PASSWD = "1cdunc0rd0ba"
 
