@@ -54,14 +54,20 @@ class PycomClient:
     def setUnixtime(self, address):
 
         try: 
-            self.unixtime = urequests.get(address)
+            self.unixtime = urequests.post(address, 
+                                           headers={'Content-Type': 'application/json'},
+                                           data=ujson.dumps({"method": "getCurrentTime", "params": {"device_id": 0}}))
             print("unixtime: ", self.unixtime.json())
-            rtc = RTC()
-            rtc.now()
-            rtc.init(time.localtime(self.unixtime.json()['ts']))
-            self.unixtime.close()
+            
         except:
             print("Error requesting UNIXTIME from API.")
+
+        
+        rtc = RTC()
+        rtc.now()
+        rtc.init(time.localtime(int(self.unixtime.json()['unixtime']/1000)))
+        self.unixtime.close()
+        
  
         
     def getServerDirection(self):
@@ -70,8 +76,6 @@ class PycomClient:
 
     def postData(self, address, raw_data):
         headers = {'Content-Type': 'application/json'}
-        print("ADDRESSs")
-        print(address)
 
         response = urequests.post(address, data=raw_data, headers=headers)
         print(response)
@@ -152,7 +156,6 @@ class PysenseClient(PycomClient):
         
     def get_acceleration(self):
         # Return a tuple of three elements
-        time.sleep_ms(5)
         return self.sensors["acceleration"].acceleration()
 
     def get_pitch(self):

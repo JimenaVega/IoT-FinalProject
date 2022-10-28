@@ -1,8 +1,13 @@
 from PycomClient import PysenseClient
+FLASK_API_ADDRESS = "http://192.168.1.163:5000/api/unixtime/"
+#THINGSBOARD_ADDRESS = "http://192.168.1.108:8080/api/v1/"
+THINGSBOARD_ADDRESS = "http://192.168.1.163:8080/api/v1/"
+TOKEN_ID = "k4xhQ85dcdrVWYeKuKMn" 
+#TOKEN_ID = "sAJ20eaXKIBDjGzHaDj0"
 
-
-SERVER_API = "http://192.168.100.6:5000/api/unixtime/"
-THINGSBOARD_ADDRESS = "http://192.168.100.6:8080/api/v1/gcv0VF7NiudY5qSEf3b4/telemetry"
+#SERVER_API = "http://192.168.1.163:5000/api/unixtime/"
+# THINGSBOARD_RPC = "http://192.168.1.163:8080/api/v1/k4xhQ85dcdrVWYeKuKMn/rpc"
+# THINGSBOARD_ADDRESS = "http://192.168.1.163:8080/api/v1/k4xhQ85dcdrVWYeKuKMn/telemetry"
 
 SSID = "LCD"
 PASSWD = "1cdunc0rd0ba"
@@ -28,18 +33,13 @@ pysense = PysenseClient("Pedro")
 pysense.connectToNetwork(SSID, PASSWD)
 
 # Gives unixtime to device
-pysense.setUnixtime(SERVER_API)
+pysense.setUnixtime(THINGSBOARD_ADDRESS + TOKEN_ID + "/rpc")
 
 # Sampling and sending default rates
 pysense.setRatesInPycom(rates)
 
 # Optional
-pysense.setServerToConnect(THINGSBOARD_ADDRESS)
-# Optional
-# pysense.setRatesFromPycom(rates, RATES_ENDPOINT)
-# print("setRatesFromPycom")
-# Get rates setted for this device from db 
-#pysense.getRatesFromdb()
+pysense.setServerToConnect(THINGSBOARD_ADDRESS + TOKEN_ID + "/telemetry/")
 
 
 # Initialize collection of all data 
