@@ -14,7 +14,7 @@ Port: 8080
 
 Corriendo en la PC de Horacio.
 
-IP: 192.168.1.6
+IP: 192.168.1.108
 
 Port: 1884 (Previamente en 1883, se cambió porque TB utiliza también ese puerto, por lo que daba errores)
 
@@ -34,6 +34,14 @@ Publicación:
 host: localhost en caso de estar en la PC donde corre el server
 
 ---
+
+
+### Analizador de tráfico
+
+**libpcap**
+
+Documentation: ls
+https://python-libpcap.readthedocs.io/en/latest/introduction.html#usage
 
 ## Posibles errores
 **MQTT Micropython** (robust.py/simple.py)
