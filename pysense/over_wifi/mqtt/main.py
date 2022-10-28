@@ -12,7 +12,7 @@ from machine import Timer
 from machine import RTC
 
 DEVICE_ID = "23"
-SERVER_ADDRESS = "192.168.1.6"
+SERVER_ADDRESS = "192.168.1.108"
 
 RPC_REQUEST_TOPIC = "v1/devices/me/rpc/request/"
 RPC_RESPONSE_TOPIC = "v1/devices/me/rpc/response/"

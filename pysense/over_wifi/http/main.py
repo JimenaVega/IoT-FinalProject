@@ -8,12 +8,14 @@ import ujson
 from machine import Timer
 from machine import RTC
 from urequests import Response
+from lib.pysense import Pysense
+from base import CreateSensors
 
-SERVER_ADDRESS = "http://192.168.1.184" #pc alejo
-# SERVER_ADDRESS = "http://192.168.1.162" #pc jime
-SERVER_PORT = "5000"
+SERVER_ADDRESS = "192.168.1.108" #pc horacio
+SERVER_PORT = "8080"
+ACCESS_TOKEN = 'aRpkHer5yrOH45TpPe9l'
 
-ADDRESS = "http://192.168.1.6:8080/api/v1/hftE8awQVgB6j5NgOFMw/telemetry"
+POST_ADDRESS = 'http://' + SERVER_ADDRESS + ":" + SERVER_PORT + "/api/v1/" + ACCESS_TOKEN + '/telemetry'
 headers = {'Content-Type': 'application/json'}
 
 RED = 0x7f0000
@@ -27,19 +29,21 @@ pycom.heartbeat(False)
 wlan = WLAN(mode=WLAN.STA)
 
 # wlan.connect(ssid='LCD-IoT', auth=(WLAN.WPA2, '1cdunc0rd0ba'))
-wlan.connect(ssid='LCD3', auth=(WLAN.WPA2, '1cdunc0rd0ba'))
+wlan.connect(ssid='LCD', auth=(WLAN.WPA2, '1cdunc0rd0ba'))
 
 while not wlan.isconnected():
     machine.idle()
 print("WiFi connected succesfully")
 print(wlan.ifconfig())
 
-unixtime = urequests.get(SERVER_ADDRESS + ":" + SERVER_PORT + "/api/unixtime/")
+unixtime = urequests.post('http://' + SERVER_ADDRESS + ":" + SERVER_PORT + "/api/v1/" + ACCESS_TOKEN + '/rpc',
+                          headers={'Content-Type': 'application/json'},
+                          data=ujson.dumps({"method": "getCurrentTime", "params": {"device_id": 0}}))
 
 print("Unix Time: ", unixtime.json())
 rtc = RTC()
 rtc.now()
-rtc.init(time.localtime(unixtime.json()['ts']))
+rtc.init(time.localtime(int(unixtime.json()['unixtime']/1000)))
 
 # Pysense Object and sensors
 py = Pysense()
@@ -212,7 +216,7 @@ while True:
 
     try:
         # response = post_method(SERVER_ADDRESS + ":" + SERVER_PORT + "/api/data/", stored_data)
-        response = urequests.post(ADDRESS, data=data, headers=headers)
+        response = urequests.post(POST_ADDRESS, data=data, headers=headers)
         print(data)
         response.close()
     except:
