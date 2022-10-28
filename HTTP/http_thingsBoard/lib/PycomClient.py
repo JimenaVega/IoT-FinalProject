@@ -51,29 +51,29 @@ class PycomClient:
         # Conexion con la API server
         self.serverURL = server
         
-    def setUnixtime(self, endpoint):
+    def setUnixtime(self, address):
 
         try: 
-            self.unixtime = urequests.get(self.serverURL + endpoint)
+            self.unixtime = urequests.get(address)
             print("unixtime: ", self.unixtime.json())
             rtc = RTC()
             rtc.now()
             rtc.init(time.localtime(self.unixtime.json()['ts']))
             self.unixtime.close()
         except:
-            print("Error requestin UNIX TIME from API.")
+            print("Error requesting UNIXTIME from API.")
  
         
     def getServerDirection(self):
         return self.serverURL
         
 
-    def postData(self, endpoint, raw_data):
+    def postData(self, address, raw_data):
         headers = {'Content-Type': 'application/json'}
         print("ADDRESSs")
-        print(self.serverURL + endpoint)
+        print(address)
 
-        response = urequests.post(self.serverURL + endpoint, json=raw_data, headers=headers)
+        response = urequests.post(address, data=raw_data, headers=headers)
         print(response)
         response.close()
         return response
@@ -98,19 +98,22 @@ class PycomClient:
         response = urequests.get(self.serverAddress + ":" + self.PORT + endpoint ).json()
         self.rates = response.json()
     
-    def setRatesFromPycom(self, rates, endpoint):
+    def setRatesInDB(self, rates, endpoint):
         """ Sets rates for every sensor into a mongo database
 
         Args:
             rates (_dictonary_): json dictonary with every sensors' sample rate and sending data rate
             endpoint (_string_): endpoint of the http api to send the new rates file
         """
-        self.rates = rates
+        self.setRatesInPycom(rates)
         print("setRatesFromJSON")
         print(self.serverURL + endpoint)
         changes = self.postData(endpoint, self.rates)
         print(changes)
-       
+
+    def setRatesInPycom(self, rates):
+        self.rates = rates
+        print("Rates now are: ", self.rates)
     
     def getCurrentRates(self, endpoint):
         response = urequests.get(self.serverURL + endpoint)
