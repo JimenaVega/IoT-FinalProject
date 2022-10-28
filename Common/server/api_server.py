@@ -1,5 +1,6 @@
 # Using flask to make an api
 # import necessary libraries and functions
+from fcntl import F_SEAL_SEAL
 import time
 from distutils.log import debug
 from flask import Flask, jsonify, request, render_template, url_for, redirect
@@ -21,12 +22,14 @@ rates = {
         'roll_rate':10,
         'pitch_rate':10
         }
-
+        
 client = MongoClient('localhost', 27017)
-db = client.flask_db
-# create a collection 
-pycom = db.pycom
-  
+db = client.http_iot
+# create a collection in the db
+pycom_data = db.pycom_data
+pycom_rates = db.pycom_rates
+
+# Get rates from an html file
 @app.route('/', methods=('GET', 'POST'))
 def index():
 
@@ -41,7 +44,7 @@ def index():
         roll_rate = request.form['roll_rate']
         pitch_rate = request.form['pitch_rate']
         degree = request.form['degree']
-        pycom.insert_one({
+        pycom_rates.insert_one({
                           'mac_address':mac_address,
                           'transmission_rate':transmission_rate,
                           'acceleration_rate':acc_rate,
@@ -54,7 +57,7 @@ def index():
                           'degree': degree})
         return redirect(url_for('index'))
 
-    all_pycom = pycom.find()
+    all_pycom = pycom_rates.find()
     return render_template('index.html', pycom=all_pycom)
 
 # API receives a packet of data (sensors info) from pycom devices
@@ -65,10 +68,11 @@ def get_data():
     try:
         json = request.get_json(force=True)
         print(json)
+        #pycom_data.insertOne(json)
     except:
         print('error handleado')
 
-    cursor = pycom.find().limit(1).sort([('$natural',-1)])
+    cursor = pycom_data.find().limit(1).sort([('$natural',-1)])
    
     return dumps(cursor)
 
@@ -82,21 +86,23 @@ def get_timestamp():
     return jsonify({"ts":unix_timestamp})
 
 # Rates can also be configurated through this api method
+# Pycom client will send the new rates and these will be saved into mongodb
 # curl -X POST -H "Content-Type: application/json" -d '{"transmission_rate":1}' http://192.168.1.162:5000/api/set_rates/#
 @app.route('/api/set_rates/', methods=['POST'])
 def set_rates():
     try:
         json = request.get_json(force=False)
         print(json)
+        pycom_rates.insert_one(json)
     except:
         print('error handleado')
-    
+        return jsonify({'changes': '0'})
+        
     return jsonify({'changes': '1'})
 
 @app.route('/api/rates/', methods=['GET'])
 def get_rates():
     return jsonify(rates)
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=5000,debug=True)
