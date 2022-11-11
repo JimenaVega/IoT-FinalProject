@@ -52,6 +52,10 @@ class PycomClient:
         self.serverURL = server
         
     def setUnixtime(self, address):
+        """POST to RPC (remote procedure calls) of Thingsboard to get current unixtime
+        Args:
+            address (string): Thingsboard RPC url
+        """
 
         try: 
             self.unixtime = urequests.post(address, 
@@ -75,12 +79,14 @@ class PycomClient:
         
 
     def postData(self, address, raw_data):
+        print("ADDRESS: ", address)
         headers = {'Content-Type': 'application/json'}
 
         response = urequests.post(address, data=raw_data, headers=headers)
-        print(response)
+        #server_response = response.json()
+        #print(server_response)
         response.close()
-        return response
+        #return server_response
     
     # def _configSensors(self):
     #     pyObject = None
