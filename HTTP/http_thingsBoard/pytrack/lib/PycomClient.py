@@ -8,11 +8,9 @@ import binascii
 from network import WLAN
 from machine import Timer
 from machine import RTC
-from const import RED, GREEN, BLUE, PYSCAN, PYTRACK
+from const import RED, GREEN, BLUE
 
-from MFRC630 import MFRC630
-from LIS2HH12 import LIS2HH12
-from LTR329ALS01 import LTR329ALS01
+from L76GNSS import L76GNSS
 
 from machine import Timer
 from pycoproc_1 import Pycoproc
@@ -127,61 +125,43 @@ class PycomClient:
         return ujson.dumps(data)
     
 
-class PyscanClient(PycomClient):
+class PytrackClient(PycomClient):
 
     def __init__(self, name):
         super().__init__(name)
         
-        self.pyscan = Pycoproc(Pycoproc.PYSCAN)
+        self.pytrack = Pycoproc(Pycoproc.PYTRACK)
         self.sensors = dict()
-        print("Se creo el pyscan: ", name)
+        print("Se creo el pytrack: ", name)
         
-        self.sensors["light"]=LTR329ALS01(self.pyscan)
-        self.sensors["acceleration"]=LIS2HH12(self.pyscan)
-        self.sensors["nfc"] = MFRC630(self.pyscan)
-        
-        self.chrono = Timer.Chrono()
-        
-    def get_acceleration(self):
-        # Return a tuple of three elements
-        return self.sensors["acceleration"].acceleration()
+        self.sensors["coordinates"]=L76GNSS(self.pytrack)
 
-    def get_light(self):
-        # Return a tuple of two elements
-        return self.sensors["light"].light()
+        self.chrono = Timer.Chrono()
+
+    def get_coordinates(self):
+        return self.sensors["coordinates"].coordinates()
+
         
     def _transmission_handler(self, alarm):
         alarm.cancel()
         alarm = Timer.Alarm(self._transmission_handler, self.rates['transmission_rate'], periodic=True)
         # print("[{}]: Transmission alarm every {} seconds.".format(int(chrono.read()), rates['transmission_rate']))
 
-
-    def _acceleration_handler(self, alarm):
+    def _coordinates_handler(self, alarm):
         alarm.cancel()
-        alarm = Timer.Alarm(self._acceleration_handler, self.rates['acceleration_rate'], periodic=True)
-        self.data_sensors['acceleration'] = self.get_acceleration()
-        # print("[{}]: Acceleration alarm every {} seconds.".format(int(chrono.read()), rates['acceleration_rate']))
-
-
-    def _light_handler(self, alarm):
-        alarm.cancel()
-        alarm = Timer.Alarm(self._light_handler, self.rates['light_rate'], periodic=True)
-        self.data_sensors['light'] = self.get_light()
-        # print("[{}]: Light alarm every {} seconds.".format(int(chrono.read()), rates['light_rate']))
-
+        alarm = Timer.Alarm(self._coordinates_handler, self.rates['coordinates'], periodic=True)
+        self.data_sensors['coordinates'] = self.get_coordinates()
 
     def _battery_voltage_handler(self, alarm):
         alarm.cancel()
         alarm = Timer.Alarm(self._battery_voltage_handler,  self.rates['battery_voltage_rate'], periodic=True)
-        self.data_sensors['battery_voltage'] = self.pyscan.read_battery_voltage() * 100
+        self.data_sensors['battery_voltage'] = self.pytrack.read_battery_voltage() * 100
         # print("[{}]: Battery voltage alarm every {} seconds.".format(int(chrono.read()), rates['battery_voltage_rate']))
 
 
-    
     def initTimers(self):
         transmission_alarm      = Timer.Alarm(self._transmission_handler, self.rates['transmission_rate'], periodic=True)
-        acceleration_alarm      = Timer.Alarm(self._acceleration_handler, self.rates['acceleration_rate'], periodic=True)
-        light_alarm             = Timer.Alarm(self._light_handler, self.rates['light_rate'], periodic=True)
+        coordinates             = Timer.Alarm(self._coordinates_handler, self.rates['coordinates_rate'], periodic=True)
         battery_voltage_alarm   = Timer.Alarm(self._battery_voltage_handler, self.rates['battery_voltage_rate'], periodic=True)
        
         print("Init timers DONE ")
