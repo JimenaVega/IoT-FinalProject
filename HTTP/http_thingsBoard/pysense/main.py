@@ -1,15 +1,10 @@
 from PycomClient import PysenseClient
 FLASK_API_ADDRESS = "http://192.168.1.163:5000/api/unixtime/"
-#THINGSBOARD_ADDRESS = "http://192.168.1.108:8080/api/v1/"
-THINGSBOARD_ADDRESS = "http://192.168.100.6:8080/api/v1/"
-TOKEN_ID = "gcv0VF7NiudY5qSEf3b4"
-
-# THINGSBOARD_RPC = "http://192.168.1.163:8080/api/v1/k4xhQ85dcdrVWYeKuKMn/rpc"
-# THINGSBOARD_ADDRESS = "http://192.168.1.163:8080/api/v1/k4xhQ85dcdrVWYeKuKMn/telemetry"
+THINGSBOARD_ADDRESS = "http://192.168.1.163:8080/api/v1/"
+TOKEN_ID = "k4xhQ85dcdrVWYeKuKMn"
 
 SSID = "LCD"
 PASSWD = "1cdunc0rd0ba"
-
 
 
 rates = {
