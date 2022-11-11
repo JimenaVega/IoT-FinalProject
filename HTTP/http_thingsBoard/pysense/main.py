@@ -5,7 +5,7 @@ TOKEN_ID = "k4xhQ85dcdrVWYeKuKMn"
 
 SSID = "LCD"
 PASSWD = "1cdunc0rd0ba"
-
+#https://demo.thingsboard.io/api/v1/ABC123/attributes?clientKeys=attribute1,attribute2
 
 rates = {
         'transmission_rate':10,

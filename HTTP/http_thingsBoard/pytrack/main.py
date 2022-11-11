@@ -14,7 +14,7 @@ rates = {
         }
 
 # Create object
-pytrack = PytrackClient("Pedro")
+pytrack = PytrackClient("Pytrack_0")
 
 # Connect to WIFI network
 pytrack.connectToNetwork(SSID, PASSWD)
